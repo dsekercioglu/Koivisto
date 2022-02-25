@@ -120,6 +120,8 @@ extern int                 RAZOR_MARGIN;
 extern int                 FUTILITY_MARGIN;
 extern int                 SE_MARGIN_STATIC;
 extern int                 LMR_DIV;
+extern int                 Q_SEE_BETA;
+extern int                 Q_SEE_T;
 
 void initLMR();
 
