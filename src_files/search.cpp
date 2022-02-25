@@ -952,7 +952,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
             > beta)
             return beta;
 
-        if (isCapture(m) && sd->getCaptureHistory(m, b->getActivePlayer()) < -92) {
+        if (isCapture(m) && sd->getCaptureHistory(m, b->getActivePlayer()) < -128) {
             continue;
         }   
         // *******************************************************************************************
