@@ -72,7 +72,7 @@ void getThreats(Board* b, SearchData* sd, Depth ply) {
     whitePawnAttacks = whitePawnAttacks
                  & (b->getPieceBB<BLACK>(KNIGHT) | b->getPieceBB<BLACK>(BISHOP)
                     | b->getPieceBB<BLACK>(ROOK) | b->getPieceBB<BLACK>(QUEEN));
-    
+
     blackPawnAttacks = blackPawnAttacks
                  & (b->getPieceBB<WHITE>(KNIGHT) | b->getPieceBB<WHITE>(BISHOP)
                     | b->getPieceBB<WHITE>(ROOK) | b->getPieceBB<WHITE>(QUEEN));
@@ -139,7 +139,7 @@ void getThreats(Board* b, SearchData* sd, Depth ply) {
 
 void initLMR() {
     int d, m;
-    
+
     for (d = 0; d < 256; d++)
         for (m = 0; m < 256; m++)
             lmrReductions[d][m] = 1.25 + log(d) * log(m) * 100 / LMR_DIV;
@@ -423,7 +423,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
 
             staticEval = en.score;
         }
-    } 
+    }
 
     // **************************************************************************************************************
     // tablebase probing:
@@ -611,9 +611,14 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 if (depth <= 7 && quiets >= lmp[isImproving][depth]) {
                     mGen->skip();
                 }
-                
+
+                int history = sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(), ply > 1 ? sd->playedMoves[ply - 2] : 0, mainThreat);
+
                 // prune quiet moves that are unlikely to improve alpha
-                if (!inCheck && moveDepth <= 7 && sd->maxImprovement[getSquareFrom(m)][getSquareTo(m)] + moveDepth * FUTILITY_MARGIN + 100 + sd->eval[b->getActivePlayer()][ply] < alpha)
+                if (!inCheck && moveDepth <= 7 &&
+                    sd->maxImprovement[getSquareFrom(m)][getSquareTo(m)] + moveDepth * FUTILITY_MARGIN + 100 +
+                    history / 10 +
+                    sd->eval[b->getActivePlayer()][ply] < alpha)
                     continue;
 
                 // **************************************************************************************************
@@ -621,8 +626,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // if the history score for a move is really bad at low depth, dont consider this
                 // move.
                 // **************************************************************************************************
-                if (!inCheck && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(), ply > 1 ? sd->playedMoves[ply - 2] : 0, mainThreat)
-                    < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
+                if (!inCheck && history < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
             }
@@ -719,7 +723,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             lmr = lmr - history / 150;
             lmr += !isImproving;
             lmr -= pv;
-            if (!sd->targetReached) 
+            if (!sd->targetReached)
                 lmr++;
             if (sd->isKiller(m, ply, b->getActivePlayer()))
                 lmr--;
@@ -856,7 +860,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             } else if (score == alpha && !sameMove(hashMove, bestMove)) {
                 bestMove = 0;
             }
-            
+
             if (depth > 7 && (td->nodes - prevNodeCount) / 2 < bestNodeCount) {
                 table->put(key, highestScore, bestMove, FORCED_ALL_NODE, depth, sd->eval[b->getActivePlayer()][ply]);
             } else {
@@ -941,7 +945,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
     Move        m;
 
     while ((m = mGen->next())) {
-        
+
         // do not consider illegal moves
         if (!b->isLegal(m))
             continue;
@@ -962,7 +966,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
             continue;
         if (see + stand_pat > beta + 200)
             return beta;
-        
+
 
         b->move(m);
         __builtin_prefetch(&table->m_entries[b->getBoardStatus()->zobrist & table->m_mask]);
@@ -1053,7 +1057,7 @@ void           Search::clearHistory() {
             memset(&this->tds[i]->searchData.cmh[0][0][0], 0, 384*2*384*4);
             memset(&this->tds[i]->searchData.fmh[0][0][0], 0, 384*2*384*4);
             memset(&this->tds[i]->searchData.killer[0][0][0], 0, 2*257*2*4);
-            memset(&this->tds[i]->searchData.maxImprovement[0][0], 0, 64*64*4); 
+            memset(&this->tds[i]->searchData.maxImprovement[0][0], 0, 64*64*4);
         }
     }
 }
