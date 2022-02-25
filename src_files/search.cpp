@@ -462,7 +462,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // razoring:
         // if a qsearch on the current position is far below beta at low depth, we can fail soft.
         // **********************************************************************************************************
-        if (depth <= 3 && staticEval + RAZOR_MARGIN < beta && !enemyThreats) {
+        if (depth <= 2 + !enemyThreats && staticEval + RAZOR_MARGIN < beta) {
             score = qSearch(b, alpha, beta, ply, td);
             if (score < beta) {
                 return score;
