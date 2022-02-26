@@ -118,6 +118,7 @@ class Search {
 
 extern int                 RAZOR_MARGIN;
 extern int                 FUTILITY_MARGIN;
+extern int                 R_FUTILITY_MARGIN;
 extern int                 SE_MARGIN_STATIC;
 extern int                 LMR_DIV;
 
