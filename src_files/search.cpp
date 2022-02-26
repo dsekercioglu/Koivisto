@@ -35,10 +35,10 @@ using namespace attacks;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 243;
-int  FUTILITY_MARGIN  = 68;
+int  RAZOR_MARGIN     = 251;
+int  FUTILITY_MARGIN  = 63;
 int  SE_MARGIN_STATIC = 0;
-int  LMR_DIV          = 267;
+int  LMR_DIV          = 264;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
@@ -960,7 +960,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
         Score see = (!inCheck && (isCapture(m) || isPromotion(m))) ? b->staticExchangeEvaluation(m) : 0;
         if (see < 0)
             continue;
-        if (see + stand_pat > beta + 200)
+        if (see + stand_pat > beta + 201)
             return beta;
         
 
