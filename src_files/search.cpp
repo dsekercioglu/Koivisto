@@ -35,10 +35,10 @@ using namespace attacks;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 251;
-int  FUTILITY_MARGIN  = 63;
+int  RAZOR_MARGIN     = 252;
+int  FUTILITY_MARGIN  = 66;
 int  SE_MARGIN_STATIC = 0;
-int  LMR_DIV          = 264;
+int  LMR_DIV          = 267;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
@@ -948,7 +948,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
 
         // if the move seems to be really good just return beta.
         if (+see_piece_vals[(getPieceType(getCapturedPiece(m)))]
-                - see_piece_vals[getPieceType(getMovingPiece(m))] - 300 + stand_pat
+                - see_piece_vals[getPieceType(getMovingPiece(m))] - 304 + stand_pat
             > beta)
             return beta;
 
@@ -960,7 +960,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
         Score see = (!inCheck && (isCapture(m) || isPromotion(m))) ? b->staticExchangeEvaluation(m) : 0;
         if (see < 0)
             continue;
-        if (see + stand_pat > beta + 201)
+        if (see + stand_pat > beta + 199)
             return beta;
         
 
