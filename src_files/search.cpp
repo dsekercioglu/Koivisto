@@ -35,10 +35,21 @@ using namespace attacks;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 243;
-int  FUTILITY_MARGIN  = 68;
-int  SE_MARGIN_STATIC = 0;
-int  LMR_DIV          = 267;
+int RAZOR_MARGIN = 243;
+int FUTILITY_MARGIN = 68;
+int R_FUTILITY_MARGIN = 68;
+int SE_MARGIN_STATIC = 0;
+int LMR_DIV = 267;
+int Q_SEE_BETA = 200;
+
+int SEE_QUIET = -40;
+int SEE_NOISY = -100;
+
+int SEE_DEPTH_BASE = 5;
+int SEE_DEPTH_FACTOR = 3;
+
+int H_BASE = 140;
+int H_QUAD = -30;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
@@ -475,7 +486,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // will definetly be above beta and stop the search here and fail soft. Also reuse information
         // from eval to prevent pruning if the oponent has multiple threats.
         // **********************************************************************************************************
-        if (depth <= 7 && enemyThreats < 2 && staticEval >= beta + (depth - (isImproving && !enemyThreats)) * FUTILITY_MARGIN
+        if (depth <= 7 && enemyThreats < 2 && staticEval >= beta + (depth - (isImproving && !enemyThreats)) * R_FUTILITY_MARGIN
             && staticEval < MIN_MATE_SCORE)
             return staticEval;
 
@@ -622,7 +633,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // move.
                 // **************************************************************************************************
                 if (!inCheck && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(), ply > 1 ? sd->playedMoves[ply - 2] : 0, mainThreat)
-                    < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
+                    < std::min(H_BASE + H_QUAD * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
             }
@@ -632,8 +643,8 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             // if the depth we are going to search the move at is small enough and the static exchange
             // evaluation for the given move is very negative, dont consider this quiet move as well.
             // ******************************************************************************************************
-            if (moveDepth <= 5 + quiet * 3 && (getCapturedPieceType(m)) < (getMovingPieceType(m))
-                && b->staticExchangeEvaluation(m) <= (quiet ? -40 * moveDepth : -100 * moveDepth))
+            if (moveDepth <= SEE_DEPTH_BASE + quiet * SEE_DEPTH_FACTOR && (getCapturedPieceType(m)) < (getMovingPieceType(m))
+                && b->staticExchangeEvaluation(m) <= (quiet ? SEE_QUIET * moveDepth : SEE_NOISY * moveDepth))
                 continue;
         }
 
@@ -960,7 +971,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
         Score see = (!inCheck && (isCapture(m) || isPromotion(m))) ? b->staticExchangeEvaluation(m) : 0;
         if (see < 0)
             continue;
-        if (see + stand_pat > beta + 200)
+        if (see + stand_pat > beta + Q_SEE_BETA)
             return beta;
         
 

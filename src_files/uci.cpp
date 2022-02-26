@@ -29,6 +29,9 @@
 #include <iostream>
 #include <thread>
 
+
+#define TUNE(param, value, min, max) (std::cout << "option name " << param << " type spin " << " default " << value << " min " << min << " max " << max << std::endl);
+
 TimeManager timeManager;
 Board*      board;
 Search      searchObject;
@@ -118,6 +121,18 @@ void uci::uci() {
     std::cout << "option name BookPath type string" << std::endl;
     std::cout << "option name SyzygyPath type string default" << std::endl;
 
+    TUNE("RAZOR_MARGIN", 243, 0, 400);
+    TUNE("FUTILITY_MARGIN", 68, 0, 400);
+    TUNE("R_FUTILITY_MARGIN", 68, 0, 400);
+    TUNE("LMR_DIV", 267, 0, 400);
+    TUNE("Q_SEE_BETA", 200, 0, 400);
+    TUNE("SEE_QUIET", -40, -300, 0);
+    TUNE("SEE_NOISY", -100, -300, 0);
+    TUNE("SEE_DEPTH_BASE", 5, 0, 20);
+    TUNE("SEE_DEPTH_FACTOR", 3, 0, 20);
+    TUNE("H_BASE", 140, 0, 512);
+    TUNE("H_QUAD", -30, -512, 512);
+
     std::cout << "uciok" << std::endl;
 }
 
@@ -187,6 +202,9 @@ void uci::processCommand(std::string str) {
         if (str.find("FUTILITY_MARGIN") != string::npos) {
             FUTILITY_MARGIN = stoi(getValue(split, "FUTILITY_MARGIN"));
         }
+        if (str.find("R_FUTILITY_MARGIN") != string::npos) {
+            R_FUTILITY_MARGIN = stoi(getValue(split, "R_FUTILITY_MARGIN"));
+        }
         if (str.find("RAZOR_MARGIN") != string::npos) {
             RAZOR_MARGIN = stoi(getValue(split, "RAZOR_MARGIN"));
         }
@@ -196,6 +214,27 @@ void uci::processCommand(std::string str) {
         if (str.find("LMR_DIV") != string::npos) {
             LMR_DIV = stoi(getValue(split, "LMR_DIV"));
             initLMR();
+        }
+        if (str.find("Q_SEE_BETA") != string::npos) {
+            Q_SEE_BETA = stoi(getValue(split, "Q_SEE_BETA"));
+        }
+        if (str.find("SEE_QUIET") != string::npos) {
+            SEE_QUIET = stoi(getValue(split, "SEE_QUIET"));
+        }
+        if (str.find("SEE_NOISY") != string::npos) {
+            SEE_NOISY = stoi(getValue(split, "SEE_NOISY"));
+        }
+        if (str.find("SEE_DEPTH_BASE") != string::npos) {
+            SEE_DEPTH_BASE = stoi(getValue(split, "SEE_DEPTH_BASE"));
+        }
+        if (str.find("SEE_DEPTH_FACTOR") != string::npos) {
+            SEE_DEPTH_FACTOR = stoi(getValue(split, "SEE_DEPTH_FACTOR"));
+        }
+        if (str.find("H_BASE") != string::npos) {
+            H_BASE = stoi(getValue(split, "H_BASE"));
+        }
+        if (str.find("H_QUAD") != string::npos) {
+            H_BASE = stoi(getValue(split, "H_QUAD"));
         }
     } else if (split.at(0) == "position") {
 
