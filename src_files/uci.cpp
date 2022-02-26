@@ -117,6 +117,8 @@ void uci::uci() {
     std::cout << "option name OwnBook type check default false" << std::endl;
     std::cout << "option name BookPath type string" << std::endl;
     std::cout << "option name SyzygyPath type string default" << std::endl;
+    std::cout << "option name H_BASE type spin default 140 min -512 max 512" << std::endl;
+    std::cout << "option name H_QUAD type spin default -30 min -512 max 0" << std::endl;
 
     std::cout << "uciok" << std::endl;
 }
@@ -195,6 +197,14 @@ void uci::processCommand(std::string str) {
         }
         if (str.find("LMR_DIV") != string::npos) {
             LMR_DIV = stoi(getValue(split, "LMR_DIV"));
+            initLMR();
+        }
+        if (str.find("H_BASE") != string::npos) {
+            H_BASE = stoi(getValue(split, "H_BASE"));
+            initLMR();
+        }
+        if (str.find("H_QUAD") != string::npos) {
+            H_QUAD = stoi(getValue(split, "H_QUAD"));
             initLMR();
         }
     } else if (split.at(0) == "position") {

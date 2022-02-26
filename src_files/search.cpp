@@ -49,6 +49,12 @@ int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 4
  * =================================================================================
  */
 
+int H_BASE = 140;
+int H_QUAD = -30;
+
+int historyThreshold(int depth, bool isImproving) {
+    return std::min(H_BASE + depth * (depth + isImproving) * H_QUAD, 0);
+}
 /**
  * checks if given side has only pawns left
  * @return
@@ -621,8 +627,9 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // if the history score for a move is really bad at low depth, dont consider this
                 // move.
                 // **************************************************************************************************
-                if (!inCheck && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(), ply > 1 ? sd->playedMoves[ply - 2] : 0, mainThreat)
-                    < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
+                if (!inCheck && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(),
+                                                 ply > 1 ? sd->playedMoves[ply - 2] : 0, mainThreat)
+                                < historyThreshold(depth, isImproving)) {
                     continue;
                 }
             }
