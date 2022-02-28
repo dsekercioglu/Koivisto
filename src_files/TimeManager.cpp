@@ -100,6 +100,16 @@ bool TimeManager::isTimeLeft(SearchData* sd) {
     return true;
 }
 
+void TimeManager::update(int depth, int eval) {
+    if(depth < 6) {
+        time_factor = 1.0;
+        last_eval = (float)eval;
+    } else {
+        float eval_diff = std::min(std::abs((float)eval - last_eval) / 25.0f, 1.0f);
+        time_factor *= std::powf(1.05, eval_diff);
+    }
+}
+
 bool TimeManager::rootTimeLeft(int score) {
     // stop the search if requested
     if (force_stop)
@@ -118,7 +128,7 @@ bool TimeManager::rootTimeLeft(int score) {
     // 100, we half the time to use. If it's lower than 30, it reaches a maximum of 1.4 times the
     // original time to use.
     if(    match_time_limit.enabled
-        && match_time_limit.time_to_use * 50.0 / std::max(score, 30) < elapsed)
+        && (float)match_time_limit.time_to_use * time_factor * 50.0 / std::max(score, 30) < elapsed)
         return false;
     
     return true;

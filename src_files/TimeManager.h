@@ -57,6 +57,9 @@ class TimeManager {
     bool           force_stop       {};
     U64            start_time       {};
 
+    float          time_factor      {};
+    float          last_eval        {};
+
     TimeManager();
 
     void setDepthLimit(Depth depth);
@@ -84,6 +87,13 @@ class TimeManager {
      * returns true if there is enough time left. This is used by the principal variation search.
      */
     bool isTimeLeft(SearchData* sd = nullptr);
+
+    /**
+     * returns true if there is enough root time. root time is used to increase the depth in between
+     * iterative deepening iterations. It ensures that the search will mostly finish its iteration.
+     * @return
+     */
+    void update(int depth, int eval);
 
     /**
      * returns true if there is enough root time. root time is used to increase the depth in between
