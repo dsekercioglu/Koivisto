@@ -24,6 +24,10 @@ TimeManager::TimeManager() {
     this->setStartTime();
 }
 
+void TimeManager::reset() {
+    this->time_factor = 1.0f;
+}
+
 void TimeManager::setDepthLimit     (Depth depth) {
     UCI_ASSERT(depth >= 0);
     
@@ -101,9 +105,9 @@ bool TimeManager::isTimeLeft(SearchData* sd) {
 }
 
 void TimeManager::update(int depth, int eval) {
+    last_eval = (float)eval;
     if(depth < 6) {
         time_factor = 1.0;
-        last_eval = (float)eval;
     } else {
         float eval_diff = std::min(std::abs((float)eval - last_eval) / 25.0f, 1.0f);
         time_factor *= std::pow(1.05f, eval_diff);

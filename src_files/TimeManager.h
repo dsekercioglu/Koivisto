@@ -62,6 +62,8 @@ class TimeManager {
 
     TimeManager();
 
+    void reset();
+
     void setDepthLimit(Depth depth);
     
     void setNodeLimit(U64 nodes);
