@@ -163,8 +163,7 @@ bool TimeManager::rootTimeLeft(int score) {
         return false;
 
     // Amplify the scores
-    int revScore = 100 - score;
-    score = 100 - (revScore * revScore / 100);
+    score = score * score / 100;
     // if we are above the maximum allowed time at root, stop
     if (elapsed >= timeToUse*50/std::max(score, 30))
         return false;
