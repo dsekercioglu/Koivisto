@@ -35,11 +35,11 @@ using namespace attacks;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 228;
-int  FUTILITY_MARGIN  = 77;
+int  RAZOR_MARGIN     = 230;
+int  FUTILITY_MARGIN  = 78;
 int  R_FUTILITY_MARGIN  = 59;
 int  SE_MARGIN_STATIC = 0;
-int  LMR_DIV          = 258;
+int  LMR_DIV          = 256;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
@@ -623,7 +623,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // move.
                 // **************************************************************************************************
                 if (!inCheck && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(), ply > 1 ? sd->playedMoves[ply - 2] : 0, mainThreat)
-                    < std::min(144 - 31 * (depth * (depth + isImproving)), 0)) {
+                    < std::min(141 - 30 * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
             }
@@ -634,7 +634,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             // evaluation for the given move is very negative, dont consider this quiet move as well.
             // ******************************************************************************************************
             if (moveDepth <= 5 + quiet * 2 && (getCapturedPieceType(m)) < (getMovingPieceType(m))
-                && b->staticExchangeEvaluation(m) <= (quiet ? -34 * moveDepth : -101 * moveDepth))
+                && b->staticExchangeEvaluation(m) <= (quiet ? -29 * moveDepth : -104 * moveDepth))
                 continue;
         }
 
