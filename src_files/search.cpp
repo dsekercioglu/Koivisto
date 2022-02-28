@@ -227,18 +227,25 @@ Move Search::bestMove(Board* b, Depth maxDepth, TimeManager* timeman, int thread
                 sDepth = sDepth < d - 3 ? d - 3 : sDepth;
                 s      = this->pvSearch(&searchBoard, alpha, beta, sDepth, 0, td, 0, 2);
                 window += window;
+                bool fail = false;
                 if (window > 500)
                     window = MIN_MATE_SCORE;
                 if (s >= beta) {
+                    fail = true;
                     beta += window;
                     sDepth--;
                 } else if (s <= alpha) {
                     beta = (alpha + beta) / 2;
+                    fail = true;
                     alpha -= window;
                 } else {
                     break;
                 }
+                if (fail) {
+                    timeman->fail(d);
+                }
             }
+            timeman->nextDepth(d);
         }
         int timeManScore = td->searchData.spentEffort[getSquareFrom(td->searchData.bestMove)]
                                                       [getSquareTo(td->searchData.bestMove)]

@@ -23,6 +23,8 @@
 #include "UCIAssert.h"
 #include "History.h"
 
+const int FAIL_FACTOR[5] = {100, 105, 110, 116, 112};
+
 auto startTime =
     std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
@@ -123,9 +125,18 @@ TimeManager::~TimeManager() {
  */
 void TimeManager::stopSearch() { forceStop = true; }
 
+
+void TimeManager::nextDepth(int depth) {
+    this->fails = 0;
+}
+
+void TimeManager::fail(int depth) {
+    this->fails += 1;
+}
+
 /**
  * returns true if there is enough time left. This is used by the principal variation search.
- */
+*/
 bool TimeManager::isTimeLeft(SearchData* sd) {
 
 
@@ -163,7 +174,8 @@ bool TimeManager::rootTimeLeft(int score) {
         return false;
 
     // if we are above the maximum allowed time at root, stop
-    if (elapsed >= timeToUse*50/std::max(score, 30))
+    int timeToUseTweaked = timeToUse * FAIL_FACTOR[std::min(this->fails, 4)] / 100;
+    if (elapsed >= timeToUseTweaked * 50 / std::max(score, 30))
         return false;
 
     return true;

@@ -39,6 +39,7 @@ class TimeManager {
     TimeMode mode;
 
     int      timeToUse;
+    int      fails;
     U64      nodesToUse;
     int      upperTimeBound;
     bool     forceStop;
@@ -62,6 +63,15 @@ class TimeManager {
      * stops the search. this should be considered to check if time is left
      */
     void     stopSearch();
+
+
+    void     nextDepth(int depth);
+    /**
+     * Call this when aspiration search fails
+     * @param depth
+     * @return
+     */
+    void     fail(int depth);
 
     /**
      * returns true if the search should continue. false otherwise.
