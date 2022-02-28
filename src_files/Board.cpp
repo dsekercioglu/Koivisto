@@ -29,6 +29,8 @@ float phaseValues[N_PIECE_TYPES] {
     0, 1, 1, 2, 4, 0,
 };
 
+int BASE = 200;
+int SCALE = 80;
 /**
  * The default constructor uses a fen-representation of the board. if nothing is specified, the starting position
  * will be used. This might crash if the given fen is illegal in its structure. e.g. not all rows/columns specified.
@@ -1325,5 +1327,7 @@ Score Board::evaluate(){
          - phaseValues[3] * bitCount(getPieceBB()[WHITE_ROOK] | getPieceBB()[BLACK_ROOK])
          - phaseValues[4] * bitCount(getPieceBB()[WHITE_QUEEN] | getPieceBB()[BLACK_QUEEN]))
          / 24.0f;
-    return (2.0f - phase) * 0.8f * (this->evaluator.evaluate(this->getActivePlayer()) + 10);
+    float base = (float)BASE / 100.0f;
+    float scale = (float)SCALE / 100.0f;
+    return (base - phase) * scale * (this->evaluator.evaluate(this->getActivePlayer()) + 10);
 }

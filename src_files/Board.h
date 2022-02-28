@@ -290,4 +290,7 @@ class Board {
     Score evaluate();
 };
 
+extern int                 BASE;
+extern int                 SCALE;
+
 #endif    // CHESSCOMPUTER_BOARD_H
