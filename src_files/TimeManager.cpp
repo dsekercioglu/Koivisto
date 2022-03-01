@@ -30,19 +30,19 @@ void TimeManager::reset() {
 
 void TimeManager::setDepthLimit     (Depth depth) {
     UCI_ASSERT(depth >= 0);
-    
+
     this->depth_limit.depth   = depth;
     this->depth_limit.enabled = true;
 }
 void TimeManager::setNodeLimit      (U64 nodes) {
     UCI_ASSERT(nodes >= 0);
-    
+
     this->node_limit.nodes   = nodes;
     this->node_limit.enabled = true;
 }
 void TimeManager::setMoveTimeLimit  (U64 move_time) {
     UCI_ASSERT(move_time >= 0);
-    
+
     this->move_time_limit.upper_time_bound = move_time;
     this->move_time_limit.enabled          = true;
 }
@@ -50,16 +50,16 @@ void TimeManager::setMatchTimeLimit (U64 time, U64 inc, int moves_to_go) {
     UCI_ASSERT(time >= 0);
     UCI_ASSERT(inc >= 0);
     UCI_ASSERT(moves_to_go >= 0);
-    
+
     constexpr U64 overhead = 50;
     const double  division = moves_to_go + 1;
-    
+
     U64 upperTimeBound = (int(time / division) * 3 + std::min(time * 0.9 + inc, inc * 3.0) - 25);
     U64 timeToUse      = upperTimeBound / 3;
-    
+
     timeToUse          = std::min(time - inc, timeToUse);
     upperTimeBound     = std::min(time - inc, upperTimeBound);
-    
+
     this->setMoveTimeLimit(upperTimeBound);
     this->match_time_limit.time_to_use      = timeToUse;
     this->match_time_limit.enabled          = true;
@@ -85,9 +85,9 @@ bool TimeManager::isTimeLeft(SearchData* sd) {
     // stop the search if requested
     if (force_stop)
         return false;
-    
+
     int elapsed = elapsedTime();
-    
+
     if (sd != nullptr && this->match_time_limit.enabled) {
         if (elapsed * 10 < this->match_time_limit.time_to_use) {
             sd->targetReached = false;
@@ -95,22 +95,24 @@ bool TimeManager::isTimeLeft(SearchData* sd) {
             sd->targetReached = true;
         }
     }
-    
+
     // if we are above the maximum allowed time, stope
     if (    this->move_time_limit.enabled
          && this->move_time_limit.upper_time_bound < elapsed)
         return false;
-    
+
     return true;
 }
 
 void TimeManager::update(int depth, int eval) {
-    last_eval = (float)eval;
-    if(depth < 6) {
+    last_eval = (float) eval;
+    if (depth < 6) {
         time_factor = 1.0;
     } else {
-        float eval_diff = std::min(std::abs((float)eval - last_eval) / 25.0f, 2.0f);
-        time_factor *= std::pow(1.05f, eval_diff);
+        if ((float) eval < last_eval) {
+            float eval_diff = std::min((last_eval - (float) eval) / 25.0f, 2.0f);
+            time_factor *= std::pow(1.05f, eval_diff);
+        }
     }
 }
 
@@ -118,13 +120,13 @@ bool TimeManager::rootTimeLeft(int score) {
     // stop the search if requested
     if (force_stop)
         return false;
-    
+
     int elapsed = elapsedTime();
-    
+
     if(    move_time_limit.enabled
         && move_time_limit.upper_time_bound < elapsed)
         return false;
-    
+
     // the score is a value between 0 and 100 where 100 means that
     // the entire time has been spent looking at the best move.
     // this indicates that there is most likely just a single best move
@@ -134,6 +136,6 @@ bool TimeManager::rootTimeLeft(int score) {
     if(    match_time_limit.enabled
         && (float)match_time_limit.time_to_use * time_factor * 50.0 / std::max(score, 30) < elapsed)
         return false;
-    
+
     return true;
 }
