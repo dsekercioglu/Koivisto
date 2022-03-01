@@ -29,8 +29,9 @@
 #include <iostream>
 #include <thread>
 
-
-#define TUNE(param, value, min, max) (std::cout << "option name " << param << " type spin " << " default " << value << " min " << min << " max " << max << std::endl);
+#define TUNE(param, value, min, max)                                                                 \
+    (std::cout << "option name " << param << " type spin "                                           \
+               << " default " << value << " min " << min << " max " << max << std::endl);
 
 TimeManager timeManager;
 Board*      board;
