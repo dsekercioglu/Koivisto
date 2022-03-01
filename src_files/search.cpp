@@ -949,7 +949,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
  * @param ply
  * @return
  */
-Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* td, bool inCheck) {
+Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* td, int plies, bool inCheck) {
     UCI_ASSERT(b);
     UCI_ASSERT(td);
     UCI_ASSERT(beta > alpha);
@@ -1034,7 +1034,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
             (!inCheck && (isCapture(m) || isPromotion(m))) ? b->staticExchangeEvaluation(m) : 0;
         if (see < 0)
             continue;
-        if (see + stand_pat > beta + 200)
+        if (see + stand_pat > beta + 200 - plies * 2)
             return beta;
         
 
@@ -1043,7 +1043,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
 
         bool  inCheckOpponent = b->isInCheck(b->getActivePlayer());
 
-        Score score           = -qSearch(b, -beta, -alpha, ply + ONE_PLY, td, inCheckOpponent);
+        Score score           = -qSearch(b, -beta, -alpha, ply + ONE_PLY, td, plies + 1, inCheckOpponent);
 
         b->undoMove();
 
