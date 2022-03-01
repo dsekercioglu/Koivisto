@@ -57,6 +57,12 @@ class TimeManager {
     bool           force_stop       {};
     U64            start_time       {};
 
+    int            last_eval        {};
+    Move           prev_move        {};
+    int            same_move_depth  {};
+    float          eval_factor      {};
+    float          move_factor      {};
+
     TimeManager();
 
     void setDepthLimit(Depth depth);
@@ -69,6 +75,8 @@ class TimeManager {
     
     void setStartTime();
 
+    void reset();
+
     /**
      * returns the time elapsed since the constructor call
      * @return
@@ -80,6 +88,13 @@ class TimeManager {
      */
     void stopSearch();
 
+    /**
+     * call this function after each aspiration window iteration
+     * @param depth
+     * @param eval
+     * @param move
+     */
+    void update(int depth, int eval, Move move);
     /**
      * returns true if there is enough time left. This is used by the principal variation search.
      */

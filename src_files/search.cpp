@@ -214,6 +214,8 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
         // we need to reset the hash between searches
         this->table->incrementAge();
 
+        this->timeManager->reset();
+
         // for each thread, we will reset the thread data like node counts, tablebase hits etc.
         for (int i = 0; i < threadCount; i++) {
             // reseting the thread data
@@ -252,6 +254,9 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
         // done very quick anyway
         if (depth < 6) {
             score = this->pvSearch(&searchBoard, -MAX_MATE_SCORE, MAX_MATE_SCORE, depth, 0, td, 0, 2);
+            if(threadId == 0) {
+                this->timeManager->update(depth, score, td->searchData.bestMove);
+            }
         } else {
             // initial window size
             Score window = 10;
@@ -267,6 +272,9 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
                 score  = this->pvSearch(&searchBoard, alpha, beta, sDepth, 0, td, 0, 2);
                 window += window;
                 // dont widen the window above a size of 500
+                if(threadId == 0) {
+                    this->timeManager->update(depth, score, td->searchData.bestMove);
+                }
                 if (window > 500)
                     window = MIN_MATE_SCORE;
                 // adjust the alpha/beta bound based on which side has failed

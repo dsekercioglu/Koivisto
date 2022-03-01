@@ -51,7 +51,7 @@ void TimeManager::setMatchTimeLimit (U64 time, U64 inc, int moves_to_go) {
     const double  division = moves_to_go + 1;
     
     U64 upperTimeBound = (int(time / division) * 3 + std::min(time * 0.9 + inc, inc * 3.0) - 25);
-    U64 timeToUse      = upperTimeBound / 3;
+    U64 timeToUse      = time / 40;
     
     timeToUse          = std::min(time - inc, timeToUse);
     upperTimeBound     = std::min(time - inc, upperTimeBound);
@@ -66,6 +66,14 @@ void TimeManager::setStartTime() {
                  std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
+void TimeManager::reset() {
+    this->last_eval = 0;
+    this->eval_factor = 1.0;
+    this->move_factor = 1.0;
+    this->prev_move = 0;
+    this->same_move_depth = 0;
+}
+
 int  TimeManager::elapsedTime() const {
     auto end   = std::chrono::duration_cast<std::chrono::milliseconds>(
                  std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -77,6 +85,28 @@ void TimeManager::stopSearch() {
     force_stop = true;
 }
 
+void TimeManager::update(int depth, int eval, Move move) {
+    if (depth < 6) {
+        this->last_eval = eval;
+        this->prev_move = move;
+        return;
+    } else {
+        if (move != this->prev_move) {
+            this->same_move_depth = 0;
+        } else {
+            this->same_move_depth += 1;
+        }
+
+        this->move_factor = std::max((float)std::pow(1.05, (float)(9 - this->same_move_depth)), 0.4f);
+
+        float diff = std::min((float)std::abs(eval - this->last_eval) / 25.0f, 1.0f);
+        this->eval_factor *= (float)std::pow(1.05, diff);
+
+        this->prev_move = move;
+        this->last_eval = eval;
+    }
+}
+
 bool TimeManager::isTimeLeft(SearchData* sd) {
     // stop the search if requested
     if (force_stop)
@@ -85,7 +115,7 @@ bool TimeManager::isTimeLeft(SearchData* sd) {
     int elapsed = elapsedTime();
     
     if (sd != nullptr && this->match_time_limit.enabled) {
-        if (elapsed * 10 < this->match_time_limit.time_to_use) {
+        if (elapsed < this->match_time_limit.time_to_use) {
             sd->targetReached = false;
         } else {
             sd->targetReached = true;
@@ -118,8 +148,8 @@ bool TimeManager::rootTimeLeft(int score) {
     // 100, we half the time to use. If it's lower than 30, it reaches a maximum of 1.4 times the
     // original time to use.
     if(    match_time_limit.enabled
-        && match_time_limit.time_to_use * 50.0 / std::max(score, 30) < elapsed)
+        && (int)(match_time_limit.time_to_use * this->eval_factor * this->move_factor * 0.8) < elapsed)
         return false;
-    
+
     return true;
 }
