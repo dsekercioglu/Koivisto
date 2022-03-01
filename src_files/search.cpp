@@ -35,10 +35,24 @@ using namespace attacks;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 243;
-int  FUTILITY_MARGIN  = 68;
-int  SE_MARGIN_STATIC = 0;
-int  LMR_DIV          = 267;
+int  RAZOR_MARGIN        = 243;
+int  FUTILITY_MARGIN     = 68;
+int  R_FUTILITY_MARGIN   = 68;
+int  NMP_FUTILITY_MARGIN = 68;
+int  NMP_LOW_DEPTH       = 30;
+int  SE_MARGIN_STATIC    = 0;
+
+int  PROBCUT_BETA        = 100;
+
+int  LMR_BASE            = 125;
+int  LMR_DIV             = 267;
+
+int  THREAT_IMPROVING    = 30;
+
+int  HIST_BASE           = 140;
+int  HIST_QUAD           = 30;
+int  SEE_QUIET           = 40;
+int  SEE_NOISY           = 100;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
@@ -130,7 +144,7 @@ void getThreats(Board* b, SearchData* sd, Depth ply) {
 void initLMR() {
     for (int d = 0; d < 256; d++){
         for (int m = 0; m < 256; m++){
-            lmrReductions[d][m] = 1.25 + log(d) * log(m) * 100 / LMR_DIV;
+            lmrReductions[d][m] = LMR_BASE / 100.0 + log(d) * log(m) * 100 / LMR_DIV;
         }
     }
 }
@@ -522,7 +536,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // *******************************************************************************************
         if (   depth        <= 7
             && enemyThreats <  2
-            && staticEval   >= beta + (depth - (isImproving && !enemyThreats)) * FUTILITY_MARGIN
+            && staticEval   >= beta + (depth - (isImproving && !enemyThreats)) * R_FUTILITY_MARGIN
             && staticEval   <  MIN_MATE_SCORE)
             return staticEval;
 
@@ -532,7 +546,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // if the static evaluation is already above beta at depth 1 and we have strong threats, asume
         // that we can atleast achieve beta
         // *******************************************************************************************
-        if (depth == 1 && staticEval > beta + (isImproving ? 0 : 30) && !enemyThreats)
+        if (depth == 1 && staticEval > beta + (isImproving ? 0 : THREAT_IMPROVING) && !enemyThreats)
             return beta;
 
         // *******************************************************************************************
@@ -541,13 +555,13 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // assume that we could achieve beta, so we can return early. Don't do nmp when the oponent
         // has threats or the position or we don't have non-pawn material.
         // *******************************************************************************************
-        if (staticEval >= beta + (5 > depth ? 30 : 0) && !(depth < 5 && enemyThreats > 0)
+        if (staticEval >= beta + (5 > depth ? NMP_LOW_DEPTH : 0) && !(depth < 5 && enemyThreats > 0)
             && !hasOnlyPawns(b, b->getActivePlayer())) {
             b->move_null();
             score =
                 -pvSearch(b, -beta, 1 - beta,
                           depth - (depth / 4 + 3) * ONE_PLY
-                              - (staticEval - beta < 300 ? (staticEval - beta) / FUTILITY_MARGIN : 3),
+                              - (staticEval - beta < 300 ? (staticEval - beta) / NMP_FUTILITY_MARGIN : 3),
                           ply + ONE_PLY, td, 0, !b->getActivePlayer());
             b->undoMove_null();
             if (score >= beta) {
@@ -565,7 +579,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
     // this is based on other top engines.
     // ***********************************************************************************************
 
-    Score     betaCut = beta + 100;
+    Score     betaCut = beta + PROBCUT_BETA;
     if (!inCheck && !pv && depth > 4 && !skipMove && ownThreats
         && !(hashMove && en.depth >= depth - 3 && en.score < betaCut)) {
         mGen->init(sd, b, ply, 0, 0, 0, Q_SEARCH, 0);
@@ -674,7 +688,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 if (!inCheck
                     && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(),
                                         b->getPreviousMove(2), mainThreat)
-                           < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
+                           < std::min(HIST_BASE - HIST_QUAD * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
             }
@@ -686,7 +700,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             // ***************************************************************************************
             if (moveDepth <= 5 + quiet * 3
                 && (getCapturedPieceType(m)) < (getMovingPieceType(m))
-                && b->staticExchangeEvaluation(m) <= (quiet ? -40 * moveDepth : -100 * moveDepth))
+                && b->staticExchangeEvaluation(m) <= (quiet ? -SEE_QUIET * moveDepth : -SEE_NOISY * moveDepth))
                 continue;
         }
 

@@ -18,19 +18,23 @@
  ****************************************************************************************************/
 
 #include "uci.h"
+
+#include "UCIAssert.h"
 #include "attacks.h"
 #include "polyglot.h"
 #include "search.h"
-#include "UCIAssert.h"
-
 #include "syzygy/tbprobe.h"
 
 #include <fstream>
 #include <iostream>
 #include <thread>
 
+#define UCI_TUNE(param, default, min, max)                                                           \
+    (std::cout << "option name " << param << " default " << default << " min " << min << " max "     \
+               << max << std::endl);
+
 TimeManager timeManager;
-Board       board{};
+Board       board {};
 Search      searchObject;
 std::thread searchThread;
 
@@ -79,7 +83,6 @@ void uci::mainloop(int argc, char* argv[]) {
     searchObject = {};
     searchObject.init(16);
 
-
     std::cout << "Koivisto " << MAJOR_VERSION << "." << MINOR_VERSION << " by K. Kahre, F. Eggers"
               << std::endl;
 
@@ -89,14 +92,13 @@ void uci::mainloop(int argc, char* argv[]) {
     std::string line;
 
     // read given commands from shell
-    for(int i = 1; i < argc; i++){
+    for (int i = 1; i < argc; i++) {
         processCommand(argv[i]);
         // OB requires us to give an exit command once the bench command is given
-        if( strcmp(argv[i], "bench") == 0) {
+        if (strcmp(argv[i], "bench") == 0) {
             processCommand("exit");
         }
     }
-
 
     while (getline(cin, line)) {
         uci::processCommand(line);
@@ -106,7 +108,8 @@ void uci::mainloop(int argc, char* argv[]) {
 /**
  * Parses the uci command: uci
  * Displays engine version and the authors.
- * Also displays a list of all uci options which can be set. Finally, 'uciok' is sent back to receive further commands.
+ * Also displays a list of all uci options which can be set. Finally, 'uciok' is sent back to receive
+ * further commands.
  */
 void uci::uci() {
     std::cout << "id name Koivisto " << MAJOR_VERSION << "." << MINOR_VERSION << std::endl;
@@ -117,10 +120,24 @@ void uci::uci() {
     std::cout << "option name BookPath type string" << std::endl;
     std::cout << "option name SyzygyPath type string default" << std::endl;
 
+    UCI_TUNE("RAZOR_MARGIN", 243, 0, 400);
+    UCI_TUNE("FUTILITY_MARGIN", 68, 0, 400);
+    UCI_TUNE("R_FUTILITY_MARGIN", 68, 0, 400);
+    UCI_TUNE("NMP_FUTILITY_MARGIN", 68, 0, 400);
+    UCI_TUNE("NMP_LOW_DEPTH", 30, 0, 400);
+    UCI_TUNE("PROBCUT_BETA", 100, 0, 400);
+    UCI_TUNE("LMR_BASE", 125, 0, 400);
+    UCI_TUNE("LMR_DIV", 267, 0, 400);
+    UCI_TUNE("THREAT_IMPROVING", 30, 0, 400);
+
+    UCI_TUNE("HIST_BASE", 140, 0, 400);
+    UCI_TUNE("HIST_QUAD", 30, 0, 400);
+
+    UCI_TUNE("SEE_QUIET", 40, 0, 400);
+    UCI_TUNE("SEE_NOISY", 100, 0, 400);
+
     std::cout << "uciok" << std::endl;
 }
-
-
 
 /**
  * processes a single command.
@@ -159,19 +176,47 @@ void uci::processCommand(std::string str) {
         if (str.find("FUTILITY_MARGIN") != string::npos) {
             FUTILITY_MARGIN = stoi(getValue(split, "FUTILITY_MARGIN"));
         }
+        if (str.find("R_FUTILITY_MARGIN") != string::npos) {
+            R_FUTILITY_MARGIN = stoi(getValue(split, "R_FUTILITY_MARGIN"));
+        }
+        if (str.find("NMP_FUTILITY_MARGIN") != string::npos) {
+            NMP_FUTILITY_MARGIN = stoi(getValue(split, "NMP_FUTILITY_MARGIN"));
+        }
+        if (str.find("NMP_LOW_DEPTH") != string::npos) {
+            NMP_LOW_DEPTH = stoi(getValue(split, "NMP_LOW_DEPTH"));
+        }
         if (str.find("RAZOR_MARGIN") != string::npos) {
             RAZOR_MARGIN = stoi(getValue(split, "RAZOR_MARGIN"));
         }
-        if (str.find("SE_MARGIN_STATIC") != string::npos) {
-            SE_MARGIN_STATIC = stoi(getValue(split, "SE_MARGIN_STATIC"));
+        if (str.find("PROBCUT_BETA") != string::npos) {
+            PROBCUT_BETA = stoi(getValue(split, "PROBCUT_BETA"));
         }
         if (str.find("LMR_DIV") != string::npos) {
             LMR_DIV = stoi(getValue(split, "LMR_DIV"));
             initLMR();
         }
+        if (str.find("LMR_BASE") != string::npos) {
+            LMR_BASE = stoi(getValue(split, "LMR_BASE"));
+            initLMR();
+        }
+        if (str.find("THREAT_IMPROVING") != string::npos) {
+            THREAT_IMPROVING = stoi(getValue(split, "THREAT_IMPROVING"));
+        }
+        if (str.find("HIST_BASE") != string::npos) {
+            HIST_BASE = stoi(getValue(split, "HIST_BASE"));
+        }
+        if (str.find("HIST_QUAD") != string::npos) {
+            HIST_BASE = stoi(getValue(split, "HIST_QUAD"));
+        }
+        if (str.find("SEE_QUIET") != string::npos) {
+            SEE_QUIET = stoi(getValue(split, "SEE_QUIET"));
+        }
+        if (str.find("SEE_NOISY") != string::npos) {
+            SEE_NOISY = stoi(getValue(split, "SEE_NOISY"));
+        }
     } else if (split.at(0) == "position") {
-        auto fenPos  = str.find("fen");
-        auto movePos = str.find("moves");
+        auto   fenPos  = str.find("fen");
+        auto   movePos = str.find("moves");
 
         string moves {};
         if (movePos != string::npos) {
@@ -189,12 +234,12 @@ void uci::processCommand(std::string str) {
     } else if (split.at(0) == "print") {
         std::cout << board << std::endl;
     } else if (split.at(0) == "eval") {
-        nn::Evaluator evaluator{};
+        nn::Evaluator evaluator {};
         evaluator.reset(&board);
         std::cout << "eval=" << evaluator.evaluate(board.getActivePlayer()) << std::endl;
-    } else if (split.at(0) == "bench"){
+    } else if (split.at(0) == "bench") {
         bench();
-    } else if (split.at(0) == "exit" || split.at(0) == "quit"){
+    } else if (split.at(0) == "exit" || split.at(0) == "quit") {
         exit(0);
     }
 }
@@ -257,7 +302,7 @@ void uci::set_option(std::string& name, std::string& value) {
          */
         searchObject.useTableBase(TB_LARGEST > 0);
     } else if (name == "Threads") {
-        int count           = stoi(value);
+        int count = stoi(value);
         searchObject.setThreads(count);
     } else if (name == "OwnBook") {
         polyglot::book.enabled = (value == "true");
@@ -288,8 +333,8 @@ void uci::debug(bool mode) {
 
 /**
  * parses the uci command: position fen [fen] moves [m1, m2,...]
- * If the fen is not specified, the start position will be used which can also be invoked using 'startpos' instead of
- * fen ...
+ * If the fen is not specified, the start position will be used which can also be invoked using
+ * 'startpos' instead of fen ...
  * @param fen
  * @param moves
  */
@@ -302,13 +347,13 @@ void uci::position_fen(std::string fen, std::string moves) {
     splitString(moves, mv, ' ');
 
     for (string s : mv) {
-        string str1 = s.substr(0, 2);
-        string str2 = s.substr(2, 4);
-        Square s1   = squareIndex(str1);
-        Square s2   = squareIndex(str2);
+        string   str1     = s.substr(0, 2);
+        string   str2     = s.substr(2, 4);
+        Square   s1       = squareIndex(str1);
+        Square   s2       = squareIndex(str2);
 
-        Piece moving   = board.getPiece(s1);
-        Piece captured = board.getPiece(s2);
+        Piece    moving   = board.getPiece(s1);
+        Piece    captured = board.getPiece(s2);
 
         MoveType type;
 
@@ -370,8 +415,8 @@ void uci::position_fen(std::string fen, std::string moves) {
 
 /**
  * parses the uci command: position fen [fen] moves [m1, m2,...]
- * If the fen is not specified, the start position will be used which can also be invoked using 'startpos' instead of
- * fen ...
+ * If the fen is not specified, the start position will be used which can also be invoked using
+ * 'startpos' instead of fen ...
  * @param fen
  * @param moves
  */
@@ -401,9 +446,9 @@ void uci::bench() {
 
     searchObject.disableInfoStrings();
     for (int i = 0; strcmp(Benchmarks[i], ""); i++) {
-        Board b(Benchmarks[i]);
+        Board       b(Benchmarks[i]);
 
-        TimeManager manager{};
+        TimeManager manager {};
         manager.setDepthLimit(13);
         searchObject.bestMove(&b, &manager);
         SearchOverview overview = searchObject.overview();
@@ -442,43 +487,40 @@ void uci::bench() {
  */
 void uci::go(const vector<std::string>& split, const string& str) {
     uci::stop();
-    
+
     // check for perft first since it will not be working with the remaining options
     if (str.find("perft") != string::npos) {
         uci::go_perft(stoi(getValue(split, "perft")), str.find("hash") != string::npos);
         return;
     }
-    
+
     // reset the time manager
     timeManager = TimeManager();
     // parse match time.
     // check if anything like wtime, btime, winc or binc is given
-    if (   str.find("wtime") != string::npos
-        || str.find("btime") != string::npos
-        || str.find("winc")  != string::npos
-        || str.find("binc")  != string::npos
-        || str.find("binc")  != string::npos) {
+    if (str.find("wtime") != string::npos || str.find("btime") != string::npos
+        || str.find("winc") != string::npos || str.find("binc") != string::npos
+        || str.find("binc") != string::npos) {
         string wtime_str = getValue(split, "wtime");
         string btime_str = getValue(split, "btime");
         string wincr_str = getValue(split, "winc");
         string bincr_str = getValue(split, "binc");
         string mvtog_str = getValue(split, "movestogo");
-        
-        U64 wtime = (wtime_str.empty()) ? 60000000 : stoi(wtime_str);
-        U64 btime = (btime_str.empty()) ? 60000000 : stoi(btime_str);
-        U64 wincr = (wincr_str.empty()) ?        0 : stoi(wincr_str);
-        U64 bincr = (bincr_str.empty()) ?        0 : stoi(bincr_str);
-        int mvtog = (mvtog_str.empty()) ?       22 : stoi(mvtog_str);
-        
+
+        U64    wtime     = (wtime_str.empty()) ? 60000000 : stoi(wtime_str);
+        U64    btime     = (btime_str.empty()) ? 60000000 : stoi(btime_str);
+        U64    wincr     = (wincr_str.empty()) ? 0 : stoi(wincr_str);
+        U64    bincr     = (bincr_str.empty()) ? 0 : stoi(bincr_str);
+        int    mvtog     = (mvtog_str.empty()) ? 22 : stoi(mvtog_str);
+
         timeManager.setMatchTimeLimit(board.getActivePlayer() == WHITE ? wtime : btime,
-                                      board.getActivePlayer() == WHITE ? wincr : bincr,
-                                      mvtog);
+                                      board.getActivePlayer() == WHITE ? wincr : bincr, mvtog);
     }
     if (str.find("depth") != string::npos) {
         timeManager.setDepthLimit(stoi(getValue(split, "depth")));
     }
     if (str.find("nodes") != string::npos) {
-        timeManager.setNodeLimit (stoi(getValue(split, "nodes")));
+        timeManager.setNodeLimit(stoi(getValue(split, "nodes")));
     }
     if (str.find("movetime") != string::npos) {
         timeManager.setMoveTimeLimit(stoi(getValue(split, "movetime")));

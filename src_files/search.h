@@ -110,10 +110,24 @@ class Search {
     Move           probeDTZ(Board* board);
 };
 
-extern int                 RAZOR_MARGIN;
-extern int                 FUTILITY_MARGIN;
-extern int                 SE_MARGIN_STATIC;
-extern int                 LMR_DIV;
+extern int RAZOR_MARGIN;
+extern int FUTILITY_MARGIN;
+extern int R_FUTILITY_MARGIN;
+extern int NMP_FUTILITY_MARGIN;
+extern int NMP_LOW_DEPTH;
+extern int SE_MARGIN_STATIC;
+
+extern int PROBCUT_BETA;
+
+extern int LMR_BASE;
+extern int LMR_DIV;
+
+extern int THREAT_IMPROVING;
+
+extern int HIST_BASE;
+extern int HIST_QUAD;
+extern int SEE_QUIET;
+extern int SEE_NOISY;
 
 void initLMR();
 
