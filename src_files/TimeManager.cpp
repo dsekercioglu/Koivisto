@@ -109,7 +109,7 @@ void TimeManager::update(int depth, int eval) {
     if(depth < 6) {
         time_factor = 1.0;
     } else {
-        float eval_diff = std::min(std::abs((float)eval - last_eval) / 25.0f, 1.0f);
+        float eval_diff = std::min(std::abs((float)eval - last_eval) / 25.0f, 2.0f);
         time_factor *= std::pow(1.05f, eval_diff);
     }
 }
