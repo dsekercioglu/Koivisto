@@ -234,7 +234,7 @@ void uci::processCommand(std::string str) {
             H_BASE = stoi(getValue(split, "H_BASE"));
         }
         if (str.find("H_QUAD") != string::npos) {
-            H_BASE = stoi(getValue(split, "H_QUAD"));
+            H_QUAD = stoi(getValue(split, "H_QUAD"));
         }
     } else if (split.at(0) == "position") {
 
