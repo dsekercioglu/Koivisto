@@ -37,10 +37,11 @@ using namespace move;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 251;
-int  FUTILITY_MARGIN  = 76;
+int  RAZOR_MARGIN     = 250;
+int  FUTILITY_MARGIN  = 79;
+int  R_FUTILITY_MARGIN = 81;
 int  SE_MARGIN_STATIC = 0;
-int  LMR_DIV          = 284;
+int  LMR_DIV          = 288;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
@@ -524,7 +525,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // *******************************************************************************************
         if (   depth        <= 7
             && enemyThreats <  2
-            && staticEval   >= beta + (depth - (isImproving && !enemyThreats)) * 84
+            && staticEval   >= beta + (depth - (isImproving && !enemyThreats)) * R_FUTILITY_MARGIN
             && staticEval   <  MIN_MATE_SCORE)
             return staticEval;
 
@@ -676,7 +677,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 if (!inCheck
                     && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(),
                                         b->getPreviousMove(2), mainThreat)
-                           < std::min(137 - 26 * (depth * (depth + isImproving)), 0)) {
+                           < std::min(138 - 27 * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
             }
@@ -688,7 +689,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             // ***************************************************************************************
             if (moveDepth <= 4 + quiet * 4
                 && (getCapturedPieceType(m)) < (getMovingPieceType(m))
-                && (isCapture(m) ? mGen->lastSee : b->staticExchangeEvaluation(m)) <= (quiet ? -34 * moveDepth : -97 * moveDepth))
+                && (isCapture(m) ? mGen->lastSee : b->staticExchangeEvaluation(m)) <= (quiet ? -35 * moveDepth : -96 * moveDepth))
                 continue;
         }
 
@@ -1031,7 +1032,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
             (!inCheck && (isCapture(m) || isPromotion(m))) ? mGen->lastSee : 0;
         if (see < 0)
             continue;
-        if (see + stand_pat > beta + 200)
+        if (see + stand_pat > beta + 199)
             return beta;
         
 
