@@ -35,11 +35,11 @@ using namespace attacks;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 256;
-int  FUTILITY_MARGIN  = 56;
-int  R_FUTILITY_MARGIN  = 51;
+int  RAZOR_MARGIN     = 251;
+int  FUTILITY_MARGIN  = 77;
+int  R_FUTILITY_MARGIN  = 83;
 int  SE_MARGIN_STATIC = 0;
-int  LMR_DIV          = 270;
+int  LMR_DIV          = 283;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
@@ -623,7 +623,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // move.
                 // **************************************************************************************************
                 if (!inCheck && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(), ply > 1 ? sd->playedMoves[ply - 2] : 0, mainThreat)
-                    < std::min(142 - 32 * (depth * (depth + isImproving)), 0)) {
+                    < std::min(137 - 26 * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
             }
@@ -633,8 +633,8 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             // if the depth we are going to search the move at is small enough and the static exchange
             // evaluation for the given move is very negative, dont consider this quiet move as well.
             // ******************************************************************************************************
-            if (moveDepth <= 6 + quiet * 2 && (getCapturedPieceType(m)) < (getMovingPieceType(m))
-                && b->staticExchangeEvaluation(m) <= (quiet ? -32 * moveDepth : -88 * moveDepth))
+            if (moveDepth <= 4 + quiet * 4 && (getCapturedPieceType(m)) < (getMovingPieceType(m))
+                && b->staticExchangeEvaluation(m) <= (quiet ? -34 * moveDepth : -97 * moveDepth))
                 continue;
         }
 
@@ -961,7 +961,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
         Score see = (!inCheck && (isCapture(m) || isPromotion(m))) ? b->staticExchangeEvaluation(m) : 0;
         if (see < 0)
             continue;
-        if (see + stand_pat > beta + 213)
+        if (see + stand_pat > beta + 202)
             return beta;
         
 
