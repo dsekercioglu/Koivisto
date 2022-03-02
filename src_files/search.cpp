@@ -706,7 +706,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         Score staticExchangeEval = 1;
         if (isCapture(m)) {
             staticExchangeEval = mGen->lastSee;
-            if (depth == 1 && staticExchangeEval + sd->eval[b->getActivePlayer()][ply] > beta + 400) return beta;
+            if (depth <= 2 && staticExchangeEval + sd->eval[b->getActivePlayer()][ply] > beta + 400 * depth) return beta;
         }
 
         // keep track of the depth we want to extend by
