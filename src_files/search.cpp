@@ -44,6 +44,8 @@ int  LMR_DIV          = 267;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
 
+int qlmp[6] = {23, 17, 12, 8, 5, 3};
+
 /**
  * =================================================================================
  *                              S E A R C H
@@ -948,7 +950,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
  * @param ply
  * @return
  */
-Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* td, bool inCheck) {
+Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* td, int plies, bool inCheck) {
     UCI_ASSERT(b);
     UCI_ASSERT(td);
     UCI_ASSERT(beta > alpha);
@@ -1013,10 +1015,18 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
     Move        bestMove = 0;
     Move        m;
 
+    int tacticals = 0;
     while ((m = mGen->next())) {
         // do not consider illegal moves
         if (!b->isLegal(m))
             continue;
+
+        if (tacticals > qlmp[std::min(plies, 5)]) {
+            break;
+        }
+
+        tacticals += 1;
+
 
         // *******************************************************************************************
         // static exchange evaluation pruning (see pruning):
@@ -1036,7 +1046,7 @@ Score Search::qSearch(Board* b, Score alpha, Score beta, Depth ply, ThreadData* 
 
         bool  inCheckOpponent = b->isInCheck(b->getActivePlayer());
 
-        Score score           = -qSearch(b, -beta, -alpha, ply + ONE_PLY, td, inCheckOpponent);
+        Score score           = -qSearch(b, -beta, -alpha, ply + ONE_PLY, td, plies + 1, inCheckOpponent);
 
         b->undoMove();
 

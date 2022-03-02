@@ -105,7 +105,7 @@ class Search {
     move::Move                   bestMove(Board* b, TimeManager* timeManager, int threadId = 0);
     [[nodiscard]] bb::Score      pvSearch(Board* b, bb::Score alpha, bb::Score beta, bb::Depth depth, bb::Depth ply, ThreadData* sd,
                                           move::Move skipMove, int behindNMP, bb::Depth* lmrFactor = nullptr);
-    [[nodiscard]] bb::Score      qSearch (Board* b, bb::Score alpha, bb::Score beta, bb::Depth ply, ThreadData* sd, bool inCheck = false);
+    [[nodiscard]] bb::Score      qSearch (Board* b, bb::Score alpha, bb::Score beta, bb::Depth ply, ThreadData* sd, int plies = 0, bool inCheck = false);
     [[nodiscard]] bb::Score      probeWDL(Board* board);
     [[nodiscard]] move::Move     probeDTZ(Board* board);
 };
