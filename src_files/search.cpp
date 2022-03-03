@@ -649,6 +649,10 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         if (ply > 0 && legalMoves >= 1 && highestScore > -MIN_MATE_SCORE) {
             Depth moveDepth = std::max(1, 1 + depth - lmrReductions[depth][legalMoves]);
 
+            if (depth <= 3 && isPromotion && move::getPromotionPieceType(m) != QUEEN) {
+                continue;
+            }
+
             if (quiet) {
                 quiets++;
                 // ***********************************************************************************
@@ -658,11 +662,11 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // ***********************************************************************************
                 if (mGen->shouldSkip())
                     continue;
+
                 
                 if (depth <= 7 && quiets >= lmp[isImproving][depth]) {
                     mGen->skip();
                 }
-
                 // prune quiet moves that are unlikely to improve alpha
                 if (!inCheck
                     && moveDepth <= 7
