@@ -34,6 +34,9 @@
 using namespace bb;
 using namespace move;
 
+#define TUNE(name, default, min, max)                                                                \
+    (std::cout << "option name " << name << " type spin default " << default << " min " << min       \
+               << " max " << max << std::endl);
 
 TimeManager timeManager;
 Board       board{};
@@ -123,6 +126,14 @@ void uci::uci() {
     std::cout << "option name BookPath type string" << std::endl;
     std::cout << "option name SyzygyPath type string default" << std::endl;
 
+    TUNE("TM1", 110, 0, 200);
+    TUNE("TM2", 90, 0, 200);
+    TUNE("TM3", 50, 0, 200);
+    TUNE("TM4", 50, 0, 200);
+    TUNE("TM5", 80, 0, 200);
+    TUNE("TM6", 100, 30, 200);
+    TUNE("TM7", 55, 30, 200);
+
     std::cout << "uciok" << std::endl;
 }
 
@@ -174,6 +185,27 @@ void uci::processCommand(std::string str) {
         if (str.find("LMR_DIV") != std::string::npos) {
             LMR_DIV = std::stoi(getValue(split, "LMR_DIV"));
             initLMR();
+        }
+        if (str.find("TM1") != std::string::npos) {
+            TM1 = std::stoi(getValue(split, "TM1"));
+        }
+        if (str.find("TM2") != std::string::npos) {
+            TM2 = std::stoi(getValue(split, "TM2"));
+        }
+        if (str.find("TM3") != std::string::npos) {
+            TM3 = std::stoi(getValue(split, "TM3"));
+        }
+        if (str.find("TM4") != std::string::npos) {
+            TM4 = std::stoi(getValue(split, "TM4"));
+        }
+        if (str.find("TM5") != std::string::npos) {
+            TM5 = std::stoi(getValue(split, "TM5"));
+        }
+        if (str.find("TM6") != std::string::npos) {
+            TM6 = std::stoi(getValue(split, "TM6"));
+        }
+        if (str.find("TM7") != std::string::npos) {
+            TM7 = std::stoi(getValue(split, "TM7"));
         }
     } else if (split.at(0) == "position") {
         auto fenPos  = str.find("fen");
