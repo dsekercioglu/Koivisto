@@ -92,4 +92,9 @@ class TimeManager {
     [[nodiscard]] bool rootTimeLeft(int nodeScore, int evalScore) const;
 };
 
+extern int  TM1;
+extern int  TM2;
+extern int  TM3;
+extern int  TM4;
+extern int  TM5;
 #endif    // KOIVISTO_TIMEMANAGER_H

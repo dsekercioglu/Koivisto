@@ -34,6 +34,9 @@
 using namespace bb;
 using namespace move;
 
+#define TUNE(name, default, min, max)                                                                \
+    (std::cout << "option name " << name << " type spin default " << default << " min " << min       \
+               << " max " << max << std::endl);
 
 TimeManager timeManager;
 Board       board{};
@@ -123,6 +126,12 @@ void uci::uci() {
     std::cout << "option name BookPath type string" << std::endl;
     std::cout << "option name SyzygyPath type string default" << std::endl;
 
+    TUNE("TM1", 110, 0, 200);
+    TUNE("TM2", 90, 0, 200);
+    TUNE("TM3", 50, 0, 200);
+    TUNE("TM4", 80, 0, 200);
+    TUNE("TM5", 65, 0, 200);
+
     std::cout << "uciok" << std::endl;
 }
 
@@ -174,6 +183,21 @@ void uci::processCommand(std::string str) {
         if (str.find("LMR_DIV") != std::string::npos) {
             LMR_DIV = std::stoi(getValue(split, "LMR_DIV"));
             initLMR();
+        }
+        if (str.find("TM1") != std::string::npos) {
+            TM1 = std::stoi(getValue(split, "TM1"));
+        }
+        if (str.find("TM2") != std::string::npos) {
+            TM2 = std::stoi(getValue(split, "TM2"));
+        }
+        if (str.find("TM3") != std::string::npos) {
+            TM3 = std::stoi(getValue(split, "TM3"));
+        }
+        if (str.find("TM4") != std::string::npos) {
+            TM4 = std::stoi(getValue(split, "TM4"));
+        }
+        if (str.find("TM5") != std::string::npos) {
+            TM5 = std::stoi(getValue(split, "TM5"));
         }
     } else if (split.at(0) == "position") {
         auto fenPos  = str.find("fen");
@@ -448,34 +472,34 @@ void uci::bench() {
  */
 void uci::go(const std::vector<std::string>& split, const std::string& str) {
     uci::stop();
-    
+
     // check for perft first since it will not be working with the remaining options
     if (str.find("perft") != std::string::npos) {
         uci::go_perft(stoi(getValue(split, "perft")), str.find("hash") != std::string::npos);
         return;
     }
-    
+
     // reset the time manager
     timeManager = TimeManager();
     // parse match time.
     // check if anything like wtime, btime, winc or binc is given
     if (   str.find("wtime") != std::string::npos
-        || str.find("btime") != std::string::npos
-        || str.find("winc")  != std::string::npos
-        || str.find("binc")  != std::string::npos
-        || str.find("binc")  != std::string::npos) {
+           || str.find("btime") != std::string::npos
+           || str.find("winc")  != std::string::npos
+           || str.find("binc")  != std::string::npos
+           || str.find("binc")  != std::string::npos) {
         std::string wtime_str = getValue(split, "wtime");
         std::string btime_str = getValue(split, "btime");
         std::string wincr_str = getValue(split, "winc");
         std::string bincr_str = getValue(split, "binc");
         std::string mvtog_str = getValue(split, "movestogo");
-        
+
         U64 wtime = (wtime_str.empty()) ? 60000000 : stoi(wtime_str);
         U64 btime = (btime_str.empty()) ? 60000000 : stoi(btime_str);
         U64 wincr = (wincr_str.empty()) ?        0 : stoi(wincr_str);
         U64 bincr = (bincr_str.empty()) ?        0 : stoi(bincr_str);
         int mvtog = (mvtog_str.empty()) ?       22 : stoi(mvtog_str);
-        
+
         timeManager.setMatchTimeLimit(board.getActivePlayer() == WHITE ? wtime : btime,
                                       board.getActivePlayer() == WHITE ? wincr : bincr,
                                       mvtog);
