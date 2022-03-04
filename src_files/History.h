@@ -48,7 +48,10 @@ struct SearchData {
     bool     reduce;
     bool     targetReached                                                                           = 1;
 
-    int      getHistories(move::Move m, bb::Color side, move::Move previous, move::Move followup, bb::Square threatSquare) const;
+    int      getHistories(move::Move m, bb::Color side, move::Move previous, move::Move followup,
+                          bb::Square threatSquare) const;
+
+    int      getCounterMoveHistory(move::Move m, bb::Color side, move::Move previous) const;
 
     void     setKiller(move::Move move, bb::Depth ply, bb::Color color);
 

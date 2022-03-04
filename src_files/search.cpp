@@ -683,6 +683,12 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                            < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
+
+                if (!inCheck && depth <= 4
+                    && sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove(2))
+                           < 0) {
+                    continue;
+                }
             }
 
             // ***************************************************************************************

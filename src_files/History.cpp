@@ -26,9 +26,13 @@ int SearchData::getHistories(Move m, Color side, Move previous, Move followup, S
         return captureHistory[side][getSqToSqFromCombination(m)];
     } else {
         return (2 * (followup != 0 ? fmh[getPieceTypeSqToCombination(followup)][side][getPieceTypeSqToCombination(m)] : 0)
-               + 2 * cmh[getPieceTypeSqToCombination(previous)][side][getPieceTypeSqToCombination(m)]
+               + 2 * getCounterMoveHistory(m, side, previous)
                + 2 * th [side][threatSquare][getSqToSqFromCombination(m)]) / 3;
     }
+}
+
+int SearchData::getCounterMoveHistory(Move m, Color side, Move previous) const {
+    return cmh[getPieceTypeSqToCombination(previous)][side][getPieceTypeSqToCombination(m)];
 }
 
 /*
