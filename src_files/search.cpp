@@ -677,10 +677,16 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // if the history score for a move is really bad at low depth, dont consider this
                 // move.
                 // ***********************************************************************************
+                int h_margin = std::min(70 - 15 * (depth * (depth + isImproving)), 0);
+
+                int cm_hist =
+                    sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove());
+                int fm_hist =
+                    sd->getFollowupMoveHistory(m, b->getActivePlayer(), b->getPreviousMove(2));
+                int t_hist = sd->getThreatHistory(m, b->getActivePlayer(), mainThreat);
+
                 if (!inCheck
-                    && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(),
-                                        b->getPreviousMove(2), mainThreat)
-                           < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
+                    && ((cm_hist < h_margin) + (fm_hist < h_margin) + (t_hist < h_margin)) > 1) {
                     continue;
                 }
             }

@@ -21,14 +21,29 @@
 using namespace bb;
 using namespace move;
 
-int SearchData::getHistories(Move m, Color side, Move previous, Move followup, Square threatSquare) const {
+int SearchData::getHistories(Move m, Color side, Move previous, Move followup,
+                             Square threatSquare) const {
     if (isCapture(m)) {
         return captureHistory[side][getSqToSqFromCombination(m)];
     } else {
-        return (2 * (followup != 0 ? fmh[getPieceTypeSqToCombination(followup)][side][getPieceTypeSqToCombination(m)] : 0)
-               + 2 * cmh[getPieceTypeSqToCombination(previous)][side][getPieceTypeSqToCombination(m)]
-               + 2 * th [side][threatSquare][getSqToSqFromCombination(m)]) / 3;
+        return 2 * getFollowupMoveHistory(m, side, followup)
+               + 2 * getCounterMoveHistory(m, side, previous)
+               + 2 * getThreatHistory(m, side, threatSquare) / 3;
     }
+}
+
+int SearchData::getFollowupMoveHistory(Move m, Color side, Move followup) const {
+    return (followup != 0
+                ? fmh[getPieceTypeSqToCombination(followup)][side][getPieceTypeSqToCombination(m)]
+                : 0);
+}
+
+int SearchData::getCounterMoveHistory(Move m, Color side, Move previous) const {
+    return cmh[getPieceTypeSqToCombination(previous)][side][getPieceTypeSqToCombination(m)];
+}
+
+int SearchData::getThreatHistory(Move m, Color side, Square threatSquare) const {
+    return th[side][threatSquare][getSqToSqFromCombination(m)];
 }
 
 /*
