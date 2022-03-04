@@ -107,9 +107,9 @@ bool TimeManager::rootTimeLeft(int nodeScore, int evalScore) const {
     if (force_stop)
         return false;
 
-    nodeScore = 109 - std::min(nodeScore, 83);
+    nodeScore = 107 - std::min(nodeScore, 81);
     
-    evalScore = std::min(std::max(51, 51 + evalScore), 83);
+    evalScore = std::min(std::max(51, 51 + evalScore), 81);
 
     int elapsed = elapsedTime();
     
