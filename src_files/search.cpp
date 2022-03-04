@@ -684,7 +684,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                     continue;
                 }
 
-                if (!inCheck && depth <= 4
+                if (!inCheck && depth <= 2
                     && sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove(2))
                            < 0) {
                     continue;
