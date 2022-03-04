@@ -26,9 +26,10 @@ int SearchData::getHistories(Move m, Color side, Move previous, Move followup,
     if (isCapture(m)) {
         return captureHistory[side][getSqToSqFromCombination(m)];
     } else {
-        return 2 * getFollowupMoveHistory(m, side, followup)
-               + 2 * getCounterMoveHistory(m, side, previous)
-               + 2 * getThreatHistory(m, side, threatSquare) / 3;
+        return (2 * getFollowupMoveHistory(m, side, followup)
+                + 2 * getCounterMoveHistory(m, side, previous)
+                + 2 * getThreatHistory(m, side, threatSquare))
+               / 3;
     }
 }
 
