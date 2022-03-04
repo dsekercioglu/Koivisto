@@ -684,9 +684,12 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                     continue;
                 }
 
-                int prune_margin = -128 * depth;
-                int cm_hist = sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove());
-                if (!inCheck && staticEval <= alpha && depth <= 3 && cm_hist < prune_margin) {
+                int prune_margin   = -128 * depth;
+                int cmh_fut_margin = moveDepth * 40;
+                int cm_hist =
+                    sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove());
+                if (!inCheck && staticEval + cmh_fut_margin <= alpha && depth <= 3
+                    && cm_hist < prune_margin) {
                     continue;
                 }
             }
