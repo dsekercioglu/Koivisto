@@ -684,9 +684,9 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                     continue;
                 }
 
-                int prune_margin = -128 * depth;
+                int prune_margin = -171 * depth;
                 int cm_hist = sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove());
-                if (!inCheck && depth <= 3 && cm_hist < prune_margin) {
+                if (!inCheck && depth <= 2 && cm_hist < prune_margin) {
                     continue;
                 }
             }
