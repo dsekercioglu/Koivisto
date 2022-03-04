@@ -27,7 +27,7 @@ int SearchData::getHistories(Move m, Color side, Move previous, Move followup, S
     } else {
         return (2 * getFollowupMoveHistory(m, side, followup)
                + 2 * getCounterMoveHistory(m, side, previous)
-               + 2 * th [side][threatSquare][getSqToSqFromCombination(m)]) / 3;
+               + 2 * getThreatHistory(m, side, threatSquare)) / 3;
     }
 }
 
@@ -38,6 +38,11 @@ int SearchData::getCounterMoveHistory(Move m, Color side, Move previous) const {
 int SearchData::getFollowupMoveHistory(Move m, Color side, Move followup) const {
     return (followup != 0 ? fmh[getPieceTypeSqToCombination(followup)][side][getPieceTypeSqToCombination(m)] : 0);
 }
+
+int SearchData::getThreatHistory(Move m, Color side, Square threatSquare) const {
+    return th [side][threatSquare][getSqToSqFromCombination(m)];
+}
+
 
 /*
  * Set killer
