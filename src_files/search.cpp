@@ -685,8 +685,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                     sd->getFollowupMoveHistory(m, b->getActivePlayer(), b->getPreviousMove(2));
                 int t_hist = sd->getThreatHistory(m, b->getActivePlayer(), mainThreat);
 
-                if (!inCheck
-                    && ((cm_hist < h_margin) + (fm_hist < h_margin) + (t_hist < h_margin)) > 1) {
+                if (!inCheck && (cm_hist < h_margin) && (fm_hist < h_margin) && (t_hist < h_margin)) {
                     continue;
                 }
             }
