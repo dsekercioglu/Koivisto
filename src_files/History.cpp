@@ -31,6 +31,10 @@ int SearchData::getHistories(Move m, Color side, Move previous, Move followup, S
     }
 }
 
+int SearchData::getCounterMoveHistory(Move m, Color side, Move previous) const {
+    return cmh[getPieceTypeSqToCombination(previous)][side][getPieceTypeSqToCombination(m)];
+}
+
 int SearchData::getThreatHistory(Move m, Color side, Square threatSquare) const {
     return th[side][threatSquare][getSqToSqFromCombination(m)];
 }

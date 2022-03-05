@@ -682,6 +682,13 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                            < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
+
+                int prune_margin = -128 * depth;
+                int cm_hist =
+                    sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove());
+                if (!inCheck && staticEval <= alpha && depth <= 3 && cm_hist < prune_margin) {
+                    continue;
+                }
             }
 
             // ***************************************************************************************
