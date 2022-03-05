@@ -677,7 +677,8 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // if the history score for a move is really bad at low depth, dont consider this
                 // move.
                 // ***********************************************************************************
-                if (!inCheck
+                if (!inCheck &&
+                    staticEval <= alpha
                     && sd->getThreatHistory(m, b->getActivePlayer(), mainThreat)
                            < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
                     continue;
