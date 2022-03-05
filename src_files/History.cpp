@@ -23,7 +23,7 @@ using namespace move;
 
 int SearchData::getHistories(Move m, Color side, Move previous, Move followup, Square threatSquare) const {
     if (isCapture(m)) {
-        return captureHistory[side][getSqToSqFromCombination(m)];
+        return captureHistory[side][getPieceTypeSqToCombination(m)];
     } else {
         return (2 * (followup != 0 ? fmh[getPieceTypeSqToCombination(followup)][side][getPieceTypeSqToCombination(m)] : 0)
                + 2 * cmh[getPieceTypeSqToCombination(previous)][side][getPieceTypeSqToCombination(m)]
