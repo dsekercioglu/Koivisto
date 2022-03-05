@@ -494,9 +494,9 @@ void moveGen::updateHistory(int weight) {
             }
         } 
     } else {
-        m_sd->th[c][m_threatSquare][getSqToSqFromCombination(bestMove)] +=
+        m_sd->th[c][m_threatSquare][getPieceTypeSqToCombination(bestMove)] +=
                     + weight
-                    - weight * m_sd->th[c][m_threatSquare][getSqToSqFromCombination(bestMove)]
+                    - weight * m_sd->th[c][m_threatSquare][getPieceTypeSqToCombination(bestMove)]
                     / MAX_HIST;
         m_sd->cmh[getPieceTypeSqToCombination(m_previous)][c][getPieceTypeSqToCombination(bestMove)] +=
                     + weight
@@ -514,9 +514,9 @@ void moveGen::updateHistory(int weight) {
                             - weight * m_sd->captureHistory[c][getSqToSqFromCombination(m)]
                             / MAX_HIST;
             } else {
-                m_sd->th[c][m_threatSquare][getSqToSqFromCombination(m)] +=
+                m_sd->th[c][m_threatSquare][getPieceTypeSqToCombination(m)] +=
                             - weight
-                            - weight * m_sd->th[c][m_threatSquare][getSqToSqFromCombination(m)]
+                            - weight * m_sd->th[c][m_threatSquare][getPieceTypeSqToCombination(m)]
                             / MAX_HIST;
                 m_sd->cmh[getPieceTypeSqToCombination(m_previous)][c][getPieceTypeSqToCombination(m)] +=
                             - weight
