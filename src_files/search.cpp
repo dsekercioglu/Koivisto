@@ -677,7 +677,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // if the history score for a move is really bad at low depth, dont consider this
                 // move.
                 // ***********************************************************************************
-                int h_margin = -10 * (depth * (depth + isImproving));
+                int h_margin = -5 * (depth * (depth + isImproving));
 
                 int cm_hist =
                     sd->getCounterMoveHistory(m, b->getActivePlayer(), b->getPreviousMove());
