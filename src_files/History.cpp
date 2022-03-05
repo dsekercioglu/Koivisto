@@ -31,6 +31,10 @@ int SearchData::getHistories(Move m, Color side, Move previous, Move followup, S
     }
 }
 
+int SearchData::getThreatHistory(Move m, Color side, Square threatSquare) const {
+    return th[side][threatSquare][getSqToSqFromCombination(m)];
+}
+
 /*
  * Set killer
  */
