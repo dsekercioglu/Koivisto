@@ -464,9 +464,11 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         }
     }
 
+
     // we check if the evaluation improves across plies.
     sd->setHistoricEval(staticEval, b->getActivePlayer(), ply);
     bool  isImproving = inCheck ? false : sd->isImproving(staticEval, b->getActivePlayer(), ply);
+    bool  isUnresolved = enemyThreats + ownThreats > 3;
 
     if (en.zobrist == key >> 32) {
         // adjusting eval
@@ -507,6 +509,11 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
     // reset killer of granchildren
     sd->killer[b->getActivePlayer()][ply + 2][0] = 0;
     sd->killer[b->getActivePlayer()][ply + 2][1] = 0;
+
+    // Around 0.15% of positions are unresolved
+    if (isUnresolved) {
+        depth += 1;
+    }
 
     if (!skipMove && !inCheck && !pv) {
         // **********************************************************************************************************
