@@ -30,6 +30,8 @@ struct SearchData {
     // EvalImprovement
     int      maxImprovement[bb::N_SQUARES][bb::N_SQUARES]                                            = {0};
     // capture history table (side-from-to)
+    int      quietHistory[bb::N_COLORS][bb::N_PIECE_TYPES * bb::N_SQUARES]                             = {0};
+    // capture history table (side-from-to)
     int      captureHistory[bb::N_COLORS][bb::N_SQUARES * bb::N_SQUARES]                             = {0};
     // threat history
     int      th[bb::N_COLORS][bb::N_SQUARES + 1][bb::N_SQUARES * bb::N_SQUARES]                      = {0};
