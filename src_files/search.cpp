@@ -509,6 +509,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
     sd->killer[b->getActivePlayer()][ply + 2][1] = 0;
 
     if (!skipMove && !inCheck && !pv) {
+
         // **********************************************************************************************************
         // razoring:
         // if a qsearch on the current position is far below beta at low depth, we can fail soft.
@@ -532,14 +533,15 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             && staticEval   <  MIN_MATE_SCORE)
             return staticEval;
 
-
         // *******************************************************************************************
         // threat pruning:
         // if the static evaluation is already above beta at depth 1 and we have strong threats, asume
         // that we can atleast achieve beta
         // *******************************************************************************************
-        if (depth == 1 && staticEval > beta + (isImproving ? 0 : 30) && !enemyThreats)
+        if (depth <= 2 && staticEval > beta + (isImproving ? 0 : 30)
+            && ownThreats > enemyThreats + 1) {
             return beta;
+        }
 
         // *******************************************************************************************
         // null move pruning:
