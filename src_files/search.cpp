@@ -510,7 +510,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
 
     if (!skipMove && !inCheck && !pv) {
 
-        if(depth <= 2 && staticEval >= beta && ownThreats >= enemyThreats + 2) {
+        if(depth <= 2 && staticEval >= beta && ownThreats > enemyThreats) {
             return beta;
         }
         // **********************************************************************************************************
