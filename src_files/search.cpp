@@ -67,19 +67,22 @@ bool hasOnlyPawns(Board* board, Color color) {
 template<Color color>
 U64 getThreatsOfSide(Board* b, SearchData* sd, Depth ply){
     const U64 occupied         = b->getOccupiedBB();
-    
+
     const U64 opp_major  = b->getPieceBB<!color, QUEEN >()
                          | b->getPieceBB<!color, ROOK  >();
     const U64 opp_minor  = b->getPieceBB<!color, KNIGHT>()
                          | b->getPieceBB<!color, BISHOP>();
     const U64 opp_queen  = b->getPieceBB<!color, QUEEN >();
     const U64 pawns      = b->getPieceBB< color, PAWN  >();
-    
+
     // pawn attacks
     U64 pawn_attacks     = color == WHITE ?
                                      shiftNorthEast(pawns) | shiftNorthWest(pawns) :
                                      shiftSouthEast(pawns) | shiftSouthWest(pawns);
-    
+
+    const U64 promos =
+        (color == WHITE ? (shiftNorth(pawns) & bb::RANK_8_BB) : (shiftSouth(pawns) & bb::RANK_1_BB))
+        & ~occupied;
     // minor attacks
     U64 minor_attacks = 0;
     U64 k = b->getPieceBB<color, KNIGHT>();
@@ -92,7 +95,7 @@ U64 getThreatsOfSide(Board* b, SearchData* sd, Depth ply){
         minor_attacks |= lookUpBishopAttacks(bitscanForward(k), occupied);
         k = lsbReset(k);
     }
-    
+
     // rook attacks
     U64 rook_attacks = 0;
     k = b->getPieceBB(color, ROOK);
@@ -109,6 +112,7 @@ U64 getThreatsOfSide(Board* b, SearchData* sd, Depth ply){
     sd->threatCount[ply][color]  = bitCount(pawn_attacks );
     sd->threatCount[ply][color] += bitCount(minor_attacks);
     sd->threatCount[ply][color] += bitCount(rook_attacks );
+    sd->threatCount[ply][color] += bitCount(promos );
 
     return pawn_attacks | rook_attacks | minor_attacks;
 }
