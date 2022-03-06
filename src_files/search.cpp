@@ -512,7 +512,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
 
     // Around 0.15% of positions are unresolved
     if (isUnresolved) {
-        depth += 1;
+        depth += depth <= 4 ? 2: 1;
     }
 
     if (!skipMove && !inCheck && !pv) {
