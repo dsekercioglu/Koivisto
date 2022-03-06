@@ -515,7 +515,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         depth += 1;
     }
 
-    if (!skipMove && !inCheck && !pv) {
+    if (!skipMove && !inCheck && !pv && !(isUnresolved && depth <= 4)) {
         // **********************************************************************************************************
         // razoring:
         // if a qsearch on the current position is far below beta at low depth, we can fail soft.
