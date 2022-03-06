@@ -511,8 +511,8 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
     sd->killer[b->getActivePlayer()][ply + 2][1] = 0;
 
     // Around 0.15% of positions are unresolved
-    if (isUnresolved) {
-        depth += 1;
+    if (isUnresolved && depth < 4) {
+        depth = 4;
     }
 
     if (!skipMove && !inCheck && !pv) {
