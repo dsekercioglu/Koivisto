@@ -57,6 +57,8 @@ struct SearchData {
     void     setHistoricEval(bb::Score eval, bb::Color color, bb::Depth ply);
 
     bool     isImproving(bb::Score eval, bb::Color color, bb::Depth ply) const;
+
+    int      improvingAmount(bb::Score eval, bb::Color color, bb::Depth ply) const;
 } __attribute__((aligned(64)));
 
 

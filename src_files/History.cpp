@@ -67,3 +67,14 @@ bool SearchData::isImproving(Score ev, Color color, Depth ply) const {
         return true;
     }
 }
+
+/*
+ * Improving amount
+ */
+int SearchData::improvingAmount(Score ev, Color color, Depth ply) const {
+    if (ply >= 2) {
+        return (ev - eval[color][ply - 2]);
+    } else {
+        return 0;
+    }
+}

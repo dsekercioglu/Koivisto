@@ -466,7 +466,8 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
 
     // we check if the evaluation improves across plies.
     sd->setHistoricEval(staticEval, b->getActivePlayer(), ply);
-    bool  isImproving = inCheck ? false : sd->isImproving(staticEval, b->getActivePlayer(), ply);
+    bool isImproving     = inCheck ? false : sd->isImproving(staticEval, b->getActivePlayer(), ply);
+    int  improvingAmount = inCheck ? 0 : sd->improvingAmount(staticEval, b->getActivePlayer(), ply);
 
     if (en.zobrist == key >> 32) {
         // adjusting eval
@@ -509,6 +510,11 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
     sd->killer[b->getActivePlayer()][ply + 2][1] = 0;
 
     if (!skipMove && !inCheck && !pv) {
+
+        if (depth <= 2 && improvingAmount > 50 && staticEval >= beta) {
+            return staticEval;
+        }
+
         // **********************************************************************************************************
         // razoring:
         // if a qsearch on the current position is far below beta at low depth, we can fail soft.
