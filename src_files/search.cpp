@@ -64,6 +64,46 @@ bool hasOnlyPawns(Board* board, Color color) {
               | board->getPieceBB(color, KING)));
 }
 
+template<Color color, Piece piece> U64 getPieceAttacksOfSide(Board* b) {
+    const U64 occupied = b->getOccupiedBB();
+    U64       piece_bb = b->getPieceBB<color, piece>();
+    U64       attacks  = 0;
+    switch (piece) {
+        case PAWN:
+            return color == WHITE ? shiftNorthEast(piece_bb) | shiftNorthWest(piece_bb)
+                                  : shiftSouthEast(piece_bb) | shiftSouthWest(piece_bb);
+        case KNIGHT:
+            while (piece_bb) {
+                attacks |= KNIGHT_ATTACKS[bitscanForward(piece_bb)];
+                piece_bb = lsbReset(piece_bb);
+            }
+            return attacks;
+        case BISHOP:
+            while (piece_bb) {
+                attacks |= lookUpBishopAttacks(bitscanForward(piece_bb), occupied);
+                piece_bb = lsbReset(piece_bb);
+            }
+            return attacks;
+        case ROOK:
+            while (piece_bb) {
+                attacks |= lookUpRookAttacks(bitscanForward(piece_bb), occupied);
+                piece_bb = lsbReset(piece_bb);
+            }
+            return attacks;
+        case QUEEN:
+            while (piece_bb) {
+                U64 bishop_attacks = lookUpBishopAttacks(bitscanForward(piece_bb), occupied);
+                U64 rook_attacks   = lookUpRookAttacks(bitscanForward(piece_bb), occupied);
+                attacks |= bishop_attacks | rook_attacks;
+                piece_bb = lsbReset(piece_bb);
+            }
+            return attacks;
+        case KING:
+            return KING_ATTACKS[bitscanForward(piece_bb)];
+    }
+    return 0;
+}
+
 template<Color color>
 U64 getThreatsOfSide(Board* b, SearchData* sd, Depth ply){
     const U64 occupied         = b->getOccupiedBB();
@@ -76,33 +116,23 @@ U64 getThreatsOfSide(Board* b, SearchData* sd, Depth ply){
     const U64 pawns      = b->getPieceBB< color, PAWN  >();
 
     // pawn attacks
-    U64 pawn_attacks     = color == WHITE ?
-                                     shiftNorthEast(pawns) | shiftNorthWest(pawns) :
-                                     shiftSouthEast(pawns) | shiftSouthWest(pawns);
+    U64       pawn_attacks = getPieceAttacksOfSide<color, PAWN>(b);
+
+    const U64 defended_squares =
+        getPieceAttacksOfSide<!color, KNIGHT>(b) | getPieceAttacksOfSide<!color, BISHOP>(b)
+        | getPieceAttacksOfSide<!color, ROOK>(b) | getPieceAttacksOfSide<!color, QUEEN>(b)
+        | getPieceAttacksOfSide<!color, KING>(b);
 
     const U64 promos =
         (color == WHITE ? (shiftNorth(pawns) & bb::RANK_8_BB) : (shiftSouth(pawns) & bb::RANK_1_BB))
-        & ~occupied;
+        & ~(occupied | defended_squares);
+
     // minor attacks
-    U64 minor_attacks = 0;
-    U64 k = b->getPieceBB<color, KNIGHT>();
-    while (k) {
-        minor_attacks |= KNIGHT_ATTACKS[bitscanForward(k)];
-        k = lsbReset(k);
-    }
-    k = b->getPieceBB<color, BISHOP>();
-    while (k) {
-        minor_attacks |= lookUpBishopAttacks(bitscanForward(k), occupied);
-        k = lsbReset(k);
-    }
+    U64 minor_attacks =
+        getPieceAttacksOfSide<color, KNIGHT>(b) | getPieceAttacksOfSide<color, BISHOP>(b);
 
     // rook attacks
-    U64 rook_attacks = 0;
-    k = b->getPieceBB(color, ROOK);
-    while (k) {
-        rook_attacks |= lookUpRookAttacks(bitscanForward(k), occupied);
-        k = lsbReset(k);
-    }
+    U64 rook_attacks = getPieceAttacksOfSide<color, ROOK>(b);
 
     // mask pawn attacks only to minor and major pieces
     pawn_attacks  &= opp_major | opp_minor;
@@ -118,6 +148,8 @@ U64 getThreatsOfSide(Board* b, SearchData* sd, Depth ply){
 }
 
 void getThreats(Board* b, SearchData* sd, Depth ply) {
+
+
     // compute threats for both sides
     U64 whiteThreats = getThreatsOfSide<WHITE>(b, sd, ply);
     U64 blackThreats = getThreatsOfSide<BLACK>(b, sd, ply);
