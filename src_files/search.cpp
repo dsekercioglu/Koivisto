@@ -511,7 +511,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
 
     if (!skipMove && !inCheck && !pv) {
 
-        if (depth <= 2 && improvingAmount > 50 && staticEval >= beta) {
+        if (depth <= 2 && isImproving && staticEval - improvingAmount >= beta) {
             return staticEval;
         }
 
