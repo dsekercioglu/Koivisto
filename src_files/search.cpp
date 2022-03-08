@@ -37,7 +37,7 @@ using namespace move;
 
 int  lmrReductions[256][256];
 
-int  RAZOR_MARGIN     = 243;
+int  RAZOR_MARGIN     = 121;
 int  FUTILITY_MARGIN  = 68;
 int  SE_MARGIN_STATIC = 0;
 int  LMR_DIV          = 267;
@@ -513,7 +513,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // razoring:
         // if a qsearch on the current position is far below beta at low depth, we can fail soft.
         // **********************************************************************************************************
-        if (depth <= 3 && staticEval + RAZOR_MARGIN < beta) {
+        if (depth <= 3 && staticEval + RAZOR_MARGIN * depth < beta) {
             score = qSearch(b, alpha, beta, ply, td);
             if (score < beta) {
                 return score;
