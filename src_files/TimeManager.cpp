@@ -102,13 +102,17 @@ bool TimeManager::isTimeLeft(SearchData* sd) const {
     return true;
 }
 
-bool TimeManager::rootTimeLeft(int nodeScore, int evalScore) const {
+bool TimeManager::rootTimeLeft(int depth, int nodeScore, int evalScore) const {
     // stop the search if requested
     if (force_stop)
         return false;
 
-    nodeScore = 110 - std::min(nodeScore, 90);
-    
+    float accuracy = -4.5f + (float) nodeScore * 0.09f + (float) depth * 0.028f;
+    int   accScore = (int) (100.0f / (1.0f + std::exp(-accuracy)));
+    accScore       = 190 - std::max(accScore, 80);
+
+    nodeScore      = 110 - std::min(nodeScore, 90);
+
     evalScore = std::min(std::max(50, 50 + evalScore), 80);
 
     int elapsed = elapsedTime();
@@ -124,7 +128,7 @@ bool TimeManager::rootTimeLeft(int nodeScore, int evalScore) const {
     // 100, we half the time to use. If it's lower than 30, it reaches a maximum of 1.4 times the
     // original time to use.
     if(    match_time_limit.enabled
-        && match_time_limit.time_to_use * nodeScore / 100 * evalScore / 65 < elapsed)
+        && match_time_limit.time_to_use * nodeScore / 100 * accScore / 100 * evalScore / 65 < elapsed)
         return false;
     
     return true;

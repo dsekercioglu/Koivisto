@@ -299,7 +299,7 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
         }
 
         // if the search finished due to timeout, we also need to stop here
-        if (!this->timeManager->rootTimeLeft(timeManScore, evalScore))
+        if (!this->timeManager->rootTimeLeft(depth, timeManScore, evalScore))
             break;
     }
 
