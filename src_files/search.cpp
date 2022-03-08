@@ -28,6 +28,8 @@
 #include "newmovegen.h"
 #include "polyglot.h"
 #include "syzygy/tbprobe.h"
+#include <iostream>
+#include <fstream>
 
 #include <thread>
 
@@ -43,6 +45,8 @@ int  SE_MARGIN_STATIC = 0;
 int  LMR_DIV          = 267;
 
 int  lmp[2][8]        = {{0, 2, 3, 5, 8, 12, 17, 23}, {0, 3, 6, 9, 12, 18, 28, 40}};
+
+std::ofstream log_file("tmlogs.txt");
 
 /**
  * =================================================================================
@@ -232,6 +236,10 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
         }
     }
 
+    std::vector<Move> depth_moves = {};
+    std::vector<int> node_scores = {};
+    std::vector<int> eval_scores = {};
+
     // the thread id starts at 0 for the first thread
     ThreadData* td = this->tds[threadId];
     // initialise the score outside the loop tp keep track of it during iterations.
@@ -285,6 +293,7 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
                 }
             }
         }
+
         // compute a score which puts the nodes we spent looking at the best move
         // in relation to all the nodes searched so far (only thread local)
         int timeManScore = td->searchData.spentEffort[getSquareFrom(td->searchData.bestMove)]
@@ -292,7 +301,11 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
                            * 100 / td->nodes;
 
         int evalScore    = prevScore - score;
-        
+
+        depth_moves.push_back(td->searchData.bestMove);
+        node_scores.push_back(timeManScore);
+        eval_scores.push_back(evalScore);
+
         // print the info string if its the main thread
         if (threadId == 0) {
             this->printInfoString(&printBoard, depth, score);
@@ -323,6 +336,14 @@ Move Search::bestMove(Board* b, TimeManager* timeman, int threadId) {
         this->searchOverview.move  = best;
 
         // return the best move if it's the main thread
+
+        for (int i = 0; i < depth_moves.size(); i++) {
+            log_file << toString(depth_moves[i]) << " | " << node_scores[i] << " | " << eval_scores[i]
+                     << std::endl;
+        }
+        //log_file.close();
+
+
         return best;
     }
     // return nothing (doesn't matter)

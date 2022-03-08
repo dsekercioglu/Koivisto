@@ -17,11 +17,33 @@
  *                                                                                                  *
  ****************************************************************************************************/
 
+#include "attacks.h"
 #include "uci.h"
-
+#include <fstream>
 
 int main(int argc, char *argv[]) {
-    uci::mainloop(argc, argv);
+    attacks::init();
+    bb::init();
+    nn::init();
 
+
+
+    Search searchObject = {};
+    searchObject.init(16);
+
+    searchObject.disableInfoStrings();
+
+    std::string fen;
+    std::ifstream data("data.txt");
+    while (std::getline(data, fen)) {
+        Board board = new Board(fen);
+        TimeManager timeManager {};
+        timeManager.setDepthLimit(20);
+
+        searchObject.bestMove(&board, &timeManager);
+        searchObject.clearHash();
+        searchObject.clearHistory();
+    }
+    // uci::mainloop(argc, argv);
     return 0;
 }
