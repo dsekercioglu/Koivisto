@@ -107,9 +107,9 @@ bool TimeManager::rootTimeLeft(int depth, int nodeScore, int evalScore) const {
     if (force_stop)
         return false;
 
-    float accuracy = -4.5f + (float) nodeScore * 0.09f + (float) depth * 0.028f;
+    float accuracy = -4.4f + (float) nodeScore * 0.09f + (float) depth * 0.03f;
     int   accScore = (int) (100.0f / (1.0f + std::exp(-accuracy)));
-    accScore       = 190 - std::max(accScore, 80);
+    accScore       = 180 - accScore;
 
     nodeScore      = 110 - std::min(nodeScore, 90);
 
