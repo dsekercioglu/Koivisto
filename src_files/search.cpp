@@ -672,7 +672,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
 
         // keep track of the depth we want to extend by
         int extension = 0;
-
+        bool isSingular = false;
         // *******************************************************************************************
         // singular extensions
         // standard implementation apart from the fact that we cancel lmr of parent node in-case the
@@ -698,6 +698,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                     *lmrFactor = 0;
                 }
                 extension++;
+                isSingular = true;
             } else if (score >= beta) {
                 return score;
             } else if (en.score >= beta) {
@@ -837,7 +838,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 sd->setKiller(m, ply, b->getActivePlayer());
 
             // update history scores
-            mGen->updateHistory(depth + (staticEval < alpha));
+            mGen->updateHistory(depth + (staticEval < alpha) + isSingular);
 
             return highestScore;
         }
