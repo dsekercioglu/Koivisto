@@ -514,15 +514,10 @@ void moveGen::updateHistory(int weight) {
                     + weight
                     - weight * m_sd->fmh[getPieceTypeSqToCombination(m_followup)][c][getPieceTypeSqToCombination(bestMove)]
                     / MAX_HIST;
-        m_sd->stmkh[stmKing][c][getPieceTypeSqToCombination(bestMove)] +=
+        m_sd->kh[stmKing][nstmKing][c][getPieceTypeSqToCombination(bestMove)] +=
                     + weight
-                    - weight * m_sd->stmkh[stmKing][c][getPieceTypeSqToCombination(bestMove)]
+                    - weight * m_sd->kh[stmKing][nstmKing][c][getPieceTypeSqToCombination(bestMove)]
                     / MAX_HIST;
-        m_sd->nstmkh[nstmKing][c][getPieceTypeSqToCombination(bestMove)] +=
-                    + weight
-                    - weight * m_sd->nstmkh[nstmKing][c][getPieceTypeSqToCombination(bestMove)]
-                    / MAX_HIST;
-
         for (int i = 0; i < searched_index - 1; i++) {
             Move m = searched[i];
             if (isCapture(m)) {
@@ -543,14 +538,10 @@ void moveGen::updateHistory(int weight) {
                             - weight
                             - weight * m_sd->fmh[getPieceTypeSqToCombination(m_followup)][c][getPieceTypeSqToCombination(m)]
                             / MAX_HIST;
-                m_sd->stmkh[stmKing][c][getPieceTypeSqToCombination(bestMove)] +=
-                    - weight
-                    - weight * m_sd->stmkh[stmKing][c][getPieceTypeSqToCombination(bestMove)]
-                    / MAX_HIST;
-                m_sd->nstmkh[nstmKing][c][getPieceTypeSqToCombination(bestMove)] +=
-                    - weight
-                    - weight * m_sd->nstmkh[nstmKing][c][getPieceTypeSqToCombination(bestMove)]
-                    / MAX_HIST;
+                m_sd->kh[stmKing][nstmKing][c][getPieceTypeSqToCombination(bestMove)] +=
+                            - weight
+                            - weight * m_sd->kh[stmKing][nstmKing][c][getPieceTypeSqToCombination(bestMove)]
+                            / MAX_HIST;
             }
         } 
     }
