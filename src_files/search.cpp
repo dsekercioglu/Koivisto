@@ -369,8 +369,6 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
     Score       ownThreats    = 0;
     Score       enemyThreats  = 0;
     Square      mainThreat    = 0;
-
-    Square      stmKing       = bitscanForward(b->getPieceBB(b->getActivePlayer(), KING));
     Square      nstmKing      = bitscanForward(b->getPieceBB(!b->getActivePlayer(), KING));
 
     // ***********************************************************************************************
@@ -643,7 +641,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 // ***********************************************************************************
                 if (!inCheck
                     && sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(),
-                                        b->getPreviousMove(2), mainThreat, stmKing, nstmKing)
+                                        b->getPreviousMove(2), mainThreat, nstmKing)
                            < std::min(140 - 30 * (depth * (depth + isImproving)), 0)) {
                     continue;
                 }
@@ -748,7 +746,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
         // etc. Most conditions are standard and should be considered self explanatory.
         if (lmr) {
             int history = sd->getHistories(m, b->getActivePlayer(), b->getPreviousMove(),
-                                           b->getPreviousMove(2), mainThreat, stmKing, nstmKing);
+                                           b->getPreviousMove(2), mainThreat, nstmKing);
             lmr         = lmr - history / 150;
             lmr += !isImproving;
             lmr -= pv;
