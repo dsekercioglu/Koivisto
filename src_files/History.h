@@ -37,6 +37,10 @@ struct SearchData {
     int      cmh[bb::N_PIECE_TYPES * bb::N_SQUARES][bb::N_COLORS][bb::N_PIECE_TYPES * bb::N_SQUARES] = {0};
     // followup move history
     int      fmh[bb::N_PIECE_TYPES * bb::N_SQUARES][bb::N_COLORS][bb::N_PIECE_TYPES * bb::N_SQUARES] = {0};
+    // side to move king history
+    int      stmkh[bb::N_SQUARES][bb::N_COLORS][bb::N_PIECE_TYPES * bb::N_SQUARES] = {0};
+    // not side to move king history
+    int      nstmkh[bb::N_SQUARES][bb::N_COLORS][bb::N_PIECE_TYPES * bb::N_SQUARES] = {0};
     // kill table, +2 used to make sure we can always reset +2
     move::Move     killer[bb::N_COLORS][bb::MAX_INTERNAL_PLY + 2][2]                                 = {0};
     // threat data
@@ -48,7 +52,9 @@ struct SearchData {
     bool     reduce;
     bool     targetReached                                                                           = 1;
 
-    [[nodiscard]] int  getHistories(move::Move m, bb::Color side, move::Move previous, move::Move followup, bb::Square threatSquare) const;
+    [[nodiscard]] int  getHistories(move::Move m, bb::Color side, move::Move previous,
+                                    move::Move followup, bb::Square threatSquare, bb::Square stmKing,
+                                    bb::Square nstmKing) const;
 
     void               setKiller(move::Move move, bb::Depth ply, bb::Color color);
 
