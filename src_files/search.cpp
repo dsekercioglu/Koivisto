@@ -586,6 +586,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
     int         quiets          = 0;
     U64         prevNodeCount   = td->nodes;
     U64         bestNodeCount   = 0;
+    bool        ldSingular      = false;
 
     Move m;
     // loop over all moves in the movelist
@@ -716,6 +717,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                &&  sd->eval[b->getActivePlayer()][ply] < alpha - 25
                &&  en.type == CUT_NODE) {
             extension = 1;
+            ldSingular = true;
         }
 
         U64   nodeCount = td->nodes;
@@ -746,6 +748,8 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             if (sd->isKiller(m, ply, b->getActivePlayer()))
                 lmr--;
             if (sd->reduce && sd->sideToReduce != b->getActivePlayer())
+                lmr++;
+            if (ldSingular)
                 lmr++;
             if (lmr > MAX_PLY) {
                 lmr = 0;
