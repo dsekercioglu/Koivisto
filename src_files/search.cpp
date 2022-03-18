@@ -702,6 +702,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             m = mGen->next();
         }
 
+        bool isKiller = sd->isKiller(m, ply, b->getActivePlayer());
         if (pv) {
             sd->sideToReduce = !b->getActivePlayer();
             sd->reduce       = false;
@@ -712,6 +713,15 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                && !skipMove
                && !inCheck
                &&  sameMove(m, hashMove)
+               &&  ply > 0
+               &&  sd->eval[b->getActivePlayer()][ply] < alpha - 25
+               &&  en.type == CUT_NODE) {
+            extension = 1;
+        } else if (depth < 4
+               && hashMove
+               && !skipMove
+               && !inCheck
+               &&  isKiller
                &&  ply > 0
                &&  sd->eval[b->getActivePlayer()][ply] < alpha - 25
                &&  en.type == CUT_NODE) {
@@ -743,7 +753,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             lmr -= pv;
             if (!sd->targetReached) 
                 lmr++;
-            if (sd->isKiller(m, ply, b->getActivePlayer()))
+            if (isKiller)
                 lmr--;
             if (sd->reduce && sd->sideToReduce != b->getActivePlayer())
                 lmr++;
