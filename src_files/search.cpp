@@ -723,7 +723,7 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                && !inCheck
                &&  isKiller
                &&  ply > 0
-               &&  sd->eval[b->getActivePlayer()][ply] < alpha - 25
+               &&  sd->eval[b->getActivePlayer()][ply] < alpha - 100
                &&  en.type == CUT_NODE) {
             extension = 1;
         }
