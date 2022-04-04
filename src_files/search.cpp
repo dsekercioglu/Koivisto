@@ -722,8 +722,12 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
                 || en.type == PV_NODE)) {
             // compute beta cut value
             betaCut = std::min(static_cast<int>(en.score - SE_MARGIN_STATIC - depth * 2), static_cast<int>(beta));
-            // get the score from recursive call
-            score   = pvSearch(b, betaCut - 1, betaCut, depth >> 1, ply, td, m, behindNMP);
+            if (depth >= 8) {
+                // get the score from recursive call
+                score = pvSearch(b, betaCut - 1, betaCut, depth >> 1, ply, td, m, behindNMP);
+            } else {
+                score = staticEval;
+            }
             if (score < betaCut) {
                 if (lmrFactor != nullptr) {
                     depth += *lmrFactor;
@@ -748,14 +752,6 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             if (legalMoves == 0) {
                 sd->reduce = true;
             }
-        } else if (depth < 8
-               && !skipMove
-               && !inCheck
-               &&  sameMove(m, hashMove)
-               &&  ply > 0
-               &&  sd->eval[b->getActivePlayer()][ply] < alpha - 25
-               &&  en.type == CUT_NODE) {
-            extension = 1;
         }
 
         U64   nodeCount = td->nodes;
