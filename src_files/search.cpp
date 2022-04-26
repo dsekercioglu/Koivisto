@@ -725,6 +725,9 @@ Score Search::pvSearch(Board* b, Score alpha, Score beta, Depth depth, Depth ply
             // get the score from recursive call
             score   = pvSearch(b, betaCut - 1, betaCut, depth >> 1, ply, td, m, behindNMP);
             if (score < betaCut) {
+                if(betaCut + 150 <= alpha && score < betaCut) {
+                    return alpha;
+                }
                 if (lmrFactor != nullptr) {
                     depth += *lmrFactor;
                     *lmrFactor = 0;
